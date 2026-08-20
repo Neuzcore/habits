@@ -1,0 +1,17 @@
+{
+  "name": "Habits",
+  "short_name": "Habits",
+  "description": "Gewohnheiten und Hobbys tracken – täglich, an festen Tagen oder mehrmals pro Woche.",
+  "start_url": "habits.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF9F6",
+  "theme_color": "#FAF9F6",
+  "lang": "de",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
