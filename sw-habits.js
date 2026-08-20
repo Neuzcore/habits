@@ -1,5 +1,5 @@
 /* Habits – Service Worker */
-const CACHE = 'habits-v1.0.1';
+const CACHE = 'habits-v1.1.0';
 const ASSETS = [
   'habits.html',
   'manifest.json',

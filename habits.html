@@ -65,10 +65,27 @@ header{
   border:1px solid var(--line);background:var(--card);font-size:16px;
 }
 .icon-btn:active{background:var(--line-soft)}
-.sync-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--rose);
-  transform:translate(13px,-13px);border:2px solid var(--paper)}
-.sync-dot.ok{background:var(--green)}
-.sync-dot.off{display:none}
+.sync-chip{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 13px 7px 11px;border-radius:99px;
+  border:1px solid var(--line);background:var(--card);font-size:12.5px;font-weight:600;
+  color:var(--muted);white-space:nowrap;
+}
+.sync-chip i{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:none}
+.sync-chip:active{transform:scale(.97)}
+.sync-chip.ok{color:#2F6349;border-color:#CFE3D8;background:#F2F8F4}
+.sync-chip.ok i{background:var(--green)}
+.sync-chip.busy{color:#8A5F13;border-color:#EDDCB4;background:var(--amber-soft)}
+.sync-chip.busy i{background:var(--amber);animation:pulseDot 1.1s ease-in-out infinite}
+.sync-chip.err{color:var(--rose);border-color:#EBD6D6;background:var(--rose-soft)}
+.sync-chip.err i{background:var(--rose)}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.25}}
+.secret-wrap{position:relative}
+.secret-wrap input{padding-right:86px!important;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}
+.reveal-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:6px 10px;border-radius:8px;
+  font-size:12px;font-weight:600;color:var(--muted);background:var(--line-soft);
+}
+.reveal-btn:active{background:var(--line)}
 
 /* ---------- Tabs ---------- */
 nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
@@ -241,7 +258,7 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 }
 @media(min-width:600px){.sheet{border-radius:22px;max-height:88vh}}
 @keyframes up{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
-@media(prefers-reduced-motion:reduce){.sheet{animation:none}*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.sheet{animation:none}*{transition:none!important;animation:none!important}}
 .sheet-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .sheet-head h2{font-family:Fraunces,Georgia,serif;font-size:20px;flex:1}
 .field{margin-bottom:14px}
@@ -297,8 +314,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
   <div class="head-row">
     <div class="brand">Habits<span class="brand-dots" id="brandDots"></span></div>
     <div class="head-spacer"></div>
-    <button class="icon-btn" id="btnSync" aria-label="Synchronisieren">⟳<span class="sync-dot off" id="syncDot"></span></button>
-    <button class="icon-btn" id="btnSettings" aria-label="Einstellungen">⚙</button>
+    <button class="sync-chip" id="btnSync" aria-label="Cloud-Sync öffnen"><i></i><span id="syncLabel">Lokal</span></button>
   </div>
   <nav class="tabs" id="tabs">
     <button data-view="today" class="active">Heute</button>
@@ -402,24 +418,27 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
 <div class="overlay" id="ovSet">
   <div class="sheet">
     <div class="sheet-head">
-      <h2>Einstellungen</h2>
+      <h2>Cloud‑Sync</h2>
       <button class="icon-btn" data-close="ovSet">✕</button>
     </div>
     <div class="field">
       <label for="fSecret">Cloud‑Schlüssel</label>
-      <input type="text" id="fSecret" placeholder="Schlüssel eingeben" autocomplete="off" spellcheck="false">
-      <div class="hint">Wird nur auf diesem Gerät gespeichert. Ohne Schlüssel arbeitet die App rein lokal.</div>
+      <div class="secret-wrap">
+        <input type="password" id="fSecret" placeholder="Schlüssel eingeben" autocomplete="off"
+               spellcheck="false" autocapitalize="off" autocorrect="off">
+        <button type="button" class="reveal-btn" id="btnReveal">Anzeigen</button>
+      </div>
+      <div class="hint">Wird nur auf diesem Gerät gespeichert, nie im Code. Ohne Schlüssel arbeitet die App rein lokal.</div>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <div class="hint" id="syncInfo">Noch nicht abgeglichen</div>
     </div>
     <div class="btn-row">
       <button class="btn ghost" id="btnPull">Aus Cloud laden</button>
       <button class="btn ghost" id="btnPush">In Cloud sichern</button>
     </div>
-    <div class="field" style="margin-top:16px">
-      <label>Status</label>
-      <div class="hint" id="syncInfo">–</div>
-    </div>
-    <div class="sec" id="trashSec"></div>
-    <button class="btn" id="btnSaveSet">Fertig</button>
+    <button class="btn" id="btnSaveSet" style="margin-top:9px">Speichern und verbinden</button>
   </div>
 </div>
 
@@ -430,7 +449,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
 'use strict';
 
 /* ===== Konstanten ===== */
-const APP_VERSION = '1.0.1';
+const APP_VERSION = '1.1.0';
 const KV_BASE = 'https://kv-store.neuzcore.workers.dev';
 const APP_KEY = 'habits';
 const LS_DATA = 'habits_data';
@@ -442,6 +461,7 @@ const MONTHS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','No
 const COLORS = ['#3A3F8F','#3F7D5C','#D9982B','#BE5B5B','#7A4F9E','#2E7D8F','#B4653E','#5C6270'];
 const ICONS = ['✅','🏃','📚','🎸','🧘','💧','🥗','💪','🛏️','🧹','✍️','🎯','🌱','🎨','🧠','💊'];
 const HEAT_WEEKS = 26;
+const SYNC_LABELS = { local:'Lokal', load:'Lade …', save:'Speichere …', ok:'Synchronisiert', err:'Fehler' };
 const BAR_WEEKS = 12;
 
 /* ===== Zustand ===== */
@@ -455,6 +475,7 @@ let pushTimer = null;
 let pressTimer = null;
 let pressFired = false;
 let pressXY = null;
+let syncState = 'local';
 let showArchived = false;
 const memStore = {};
 
@@ -712,19 +733,28 @@ function loadLocal(){
 
 /* ===== Cloud ===== */
 function getSecret(){ return lsGet(LS_SECRET) || ''; }
-function markSync(ok){
-  const dot = $('syncDot'); if(!dot) return;
-  dot.className = 'sync-dot' + (getSecret() ? (ok ? ' ok' : '') : ' off');
+function setSync(s, info){
+  syncState = s;
+  const chip = $('btnSync');
+  if(chip){
+    const mod = s === 'ok' ? ' ok' : (s === 'err' ? ' err' : ((s === 'load' || s === 'save') ? ' busy' : ''));
+    chip.className = 'sync-chip' + mod;
+    chip.setAttribute('aria-label', 'Cloud‑Sync: ' + SYNC_LABELS[s]);
+    const lab = $('syncLabel'); if(lab) lab.textContent = SYNC_LABELS[s];
+  }
+  if(info !== undefined) setSyncInfo(info);
 }
 function setSyncInfo(txt){ const el = $('syncInfo'); if(el) el.textContent = txt; }
+function nowTime(){ return new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }); }
 
 async function cloudPull(manual){
   const s = getSecret();
-  if(!s){ if(manual) toast('Kein Cloud‑Schlüssel hinterlegt'); return; }
+  if(!s){ setSync('local', 'Kein Schlüssel hinterlegt'); if(manual) toast('Kein Cloud‑Schlüssel hinterlegt'); return; }
+  setSync('load');
   try{
     const r = await fetch(KV_BASE + '/' + APP_KEY + '/data', { headers:{ 'Authorization':'Bearer ' + s } });
     if(r.status === 404){ await cloudPush(true); if(manual) toast('Cloud war leer – lokale Daten hochgeladen'); return; }
-    if(r.status === 401){ markSync(false); setSyncInfo('Schlüssel abgelehnt'); if(manual) toast('Schlüssel abgelehnt'); return; }
+    if(r.status === 401){ setSync('err', 'Schlüssel wurde abgelehnt'); if(manual) toast('Schlüssel abgelehnt'); return; }
     if(!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     const localExists = lsGet(LS_EXISTS) === '1';
@@ -736,17 +766,17 @@ async function cloudPull(manual){
     } else if(manual){
       toast('Lokale Daten sind aktueller');
     }
-    markSync(true);
-    setSyncInfo('Zuletzt abgeglichen: ' + new Date().toLocaleTimeString('de-DE'));
+    setSync('ok', 'Zuletzt abgeglichen um ' + nowTime() + ' Uhr');
   }catch(e){
-    markSync(false); setSyncInfo('Cloud nicht erreichbar');
+    setSync('err', 'Cloud nicht erreichbar');
     if(manual) toast('Cloud nicht erreichbar');
   }
 }
 
 async function cloudPush(silent){
   const s = getSecret();
-  if(!s){ if(!silent) toast('Kein Cloud‑Schlüssel hinterlegt'); return; }
+  if(!s){ setSync('local', 'Kein Schlüssel hinterlegt'); if(!silent) toast('Kein Cloud‑Schlüssel hinterlegt'); return; }
+  setSync('save');
   try{
     const r = await fetch(KV_BASE + '/' + APP_KEY + '/data', {
       method:'PUT',
@@ -754,11 +784,10 @@ async function cloudPush(silent){
       body: JSON.stringify(state)
     });
     if(!r.ok) throw new Error('HTTP ' + r.status);
-    markSync(true);
-    setSyncInfo('Zuletzt gesichert: ' + new Date().toLocaleTimeString('de-DE'));
+    setSync('ok', 'Zuletzt gesichert um ' + nowTime() + ' Uhr');
     if(!silent) toast('In Cloud gesichert');
   }catch(e){
-    markSync(false); setSyncInfo('Sichern fehlgeschlagen');
+    setSync('err', 'Sichern fehlgeschlagen');
     if(!silent) toast('Sichern fehlgeschlagen');
   }
 }
@@ -1083,6 +1112,7 @@ function renderManage(){
     arc.forEach(function(h){ html += manageRow(h); });
     html += '</div></div>';
   }
+  html += trashHtml();
   $('view-manage').innerHTML = html;
 }
 
@@ -1097,11 +1127,10 @@ function manageRow(h){
   '</div>';
 }
 
-function renderTrash(){
-  const el = $('trashSec'); if(!el) return;
+function trashHtml(){
   const bin = state.habits.filter(function(h){ return h.deleted; });
-  if(!bin.length){ el.innerHTML = ''; return; }
-  let html = '<div class="sec-head"><div class="sec-title">Papierkorb</div>' +
+  if(!bin.length) return '';
+  let html = '<div class="sec"><div class="sec-head"><div class="sec-title">Papierkorb</div>' +
              '<div class="sec-count">' + bin.length + '</div></div><div class="list">';
   bin.forEach(function(h){
     html += '<div class="mrow"><em>' + esc(h.icon) + '</em><div class="t"><b>' + esc(h.name) + '</b>' +
@@ -1109,7 +1138,7 @@ function renderTrash(){
       '<button class="mini-btn" data-restore="' + h.id + '">Zurück</button>' +
       '<button class="mini-btn danger" data-purge="' + h.id + '">Endgültig</button></div>';
   });
-  el.innerHTML = html + '</div>';
+  return html + '</div></div>';
 }
 
 /* ===== Formular ===== */
@@ -1273,7 +1302,7 @@ function bindEvents(){
     const rs = e.target.closest('[data-restore]');
     if(rs){
       const h = state.habits.find(function(x){ return x.id === rs.dataset.restore; });
-      if(h){ h.deleted = false; h.deletedAt = null; persist(); renderTrash(); render(); toast('Wiederhergestellt'); }
+      if(h){ h.deleted = false; h.deletedAt = null; persist(); render(); toast('Wiederhergestellt'); }
       return;
     }
 
@@ -1284,7 +1313,7 @@ function bindEvents(){
       if(h && confirm('„' + h.name + '“ endgültig löschen? Alle Einträge gehen verloren.')){
         state.habits = state.habits.filter(function(x){ return x.id !== id; });
         delete state.entries[id];
-        persist(); renderTrash(); render(); toast('Endgültig gelöscht');
+        persist(); render(); toast('Endgültig gelöscht');
       }
       return;
     }
@@ -1356,17 +1385,22 @@ function bindEvents(){
     closeOv('ovNote'); render(); toast('Notiz gespeichert');
   });
 
-  $('btnSettings').addEventListener('click', function(){
+  $('btnSync').addEventListener('click', function(){
     $('fSecret').value = getSecret();
-    renderTrash();
+    $('fSecret').type = 'password';
+    $('btnReveal').textContent = 'Anzeigen';
     openOv('ovSet');
+  });
+  $('btnReveal').addEventListener('click', function(){
+    const f = $('fSecret'), show = f.type === 'password';
+    f.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Verbergen' : 'Anzeigen';
   });
   $('btnSaveSet').addEventListener('click', function(){
     const v = $('fSecret').value.trim();
     if(v) lsSet(LS_SECRET, v); else lsDel(LS_SECRET);
-    markSync(!!v);
     closeOv('ovSet');
-    if(v) cloudPull(false);
+    if(v) cloudPull(true); else setSync('local', 'Kein Schlüssel hinterlegt');
   });
   $('btnPull').addEventListener('click', function(){
     const v = $('fSecret').value.trim();
@@ -1378,8 +1412,6 @@ function bindEvents(){
     if(v) lsSet(LS_SECRET, v);
     cloudPush(false);
   });
-  $('btnSync').addEventListener('click', function(){ cloudPull(true); });
-
   Array.prototype.forEach.call(document.querySelectorAll('.overlay'), function(ov){
     ov.addEventListener('click', function(e){ if(e.target === ov) closeOv(ov.id); });
   });
@@ -1394,7 +1426,7 @@ function init(){
   loadLocal();
   buildPickers();
   bindEvents();
-  markSync(false);
+  setSync(getSecret() ? 'load' : 'local', getSecret() ? 'Verbinde …' : 'Kein Schlüssel hinterlegt');
   render();
   if(getSecret()) cloudPull(false);
   if('serviceWorker' in navigator){
