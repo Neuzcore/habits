@@ -151,6 +151,26 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 .check.on span{opacity:1;transform:scale(1)}
 .check:active{transform:scale(.88)}
 
+.chip.rose{background:var(--rose-soft);color:var(--rose)}
+.todo-row{
+  display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:11px 13px;box-shadow:var(--shadow);
+}
+.todo-main{flex:1;min-width:0;text-align:left}
+.todo-text{font-size:14.5px;font-weight:500;word-break:break-word}
+.todo-row.done .todo-text{text-decoration:line-through;color:var(--faint);font-weight:400}
+.todo-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.todo-add{
+  display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:8px 10px;margin-bottom:16px;box-shadow:var(--shadow);
+}
+.todo-add input[type=text]{flex:1;min-width:0;border:none;outline:none;background:none;padding:5px 2px}
+.todo-add input[type=date]{border:none;outline:none;background:var(--line-soft);border-radius:8px;
+  padding:6px 8px;font-size:12px;color:var(--muted);max-width:132px}
+.todo-add button{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#fff;
+  font-size:19px;line-height:1;flex:none}
+.done-toggle{width:100%;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);padding:4px 2px 9px}
 .empty{
   text-align:center;padding:34px 18px;color:var(--muted);background:var(--card);
   border:1px dashed var(--line);border-radius:var(--radius-lg);
@@ -318,6 +338,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
   </div>
   <nav class="tabs" id="tabs">
     <button data-view="today" class="active">Heute</button>
+    <button data-view="todos">To‑dos</button>
     <button data-view="week">Woche</button>
     <button data-view="stats">Statistik</button>
     <button data-view="manage">Verwalten</button>
@@ -326,6 +347,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
 
 <main>
   <section class="view active" id="view-today"></section>
+  <section class="view" id="view-todos"></section>
   <section class="view" id="view-week"></section>
   <section class="view" id="view-stats"></section>
   <section class="view" id="view-manage"></section>
@@ -398,6 +420,28 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
   </div>
 </div>
 
+<!-- To-do bearbeiten -->
+<div class="overlay" id="ovTodo">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="todoTitle">To‑do bearbeiten</h2>
+      <button class="icon-btn" data-close="ovTodo">✕</button>
+    </div>
+    <div class="field">
+      <label for="fTodoText">Aufgabe</label>
+      <input type="text" id="fTodoText" placeholder="Was ist zu tun?" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="fTodoDue">Fällig am (optional)</label>
+      <input type="date" id="fTodoDue">
+    </div>
+    <button class="btn" id="btnSaveTodo">Speichern</button>
+    <div class="btn-row" id="todoActions" style="display:none">
+      <button class="btn ghost" id="btnTodoDelete" style="color:var(--rose)">Löschen</button>
+    </div>
+  </div>
+</div>
+
 <!-- Notiz zum Tag -->
 <div class="overlay" id="ovNote">
   <div class="sheet">
@@ -449,7 +493,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
 'use strict';
 
 /* ===== Konstanten ===== */
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 const KV_BASE = 'https://kv-store.neuzcore.workers.dev';
 const APP_KEY = 'habits';
 const LS_DATA = 'habits_data';
@@ -461,11 +505,12 @@ const MONTHS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','No
 const COLORS = ['#3A3F8F','#3F7D5C','#D9982B','#BE5B5B','#7A4F9E','#2E7D8F','#B4653E','#5C6270'];
 const ICONS = ['✅','🏃','📚','🎸','🧘','💧','🥗','💪','🛏️','🧹','✍️','🎯','🌱','🎨','🧠','💊'];
 const HEAT_WEEKS = 26;
+const TODO_KEEP_DAYS = 7;
 const SYNC_LABELS = { local:'Lokal', load:'Lade …', save:'Speichere …', ok:'Synchronisiert', err:'Fehler' };
 const BAR_WEEKS = 12;
 
 /* ===== Zustand ===== */
-let state = { habits: [], entries: {}, updated: 0 };
+let state = { habits: [], entries: {}, todos: [], updated: 0 };
 let currentView = 'today';
 let editId = null;
 let form = { type:'daily', days:[1,3,5], color:COLORS[0], icon:'✅' };
@@ -477,6 +522,8 @@ let pressFired = false;
 let pressXY = null;
 let syncState = 'local';
 let showArchived = false;
+let showDoneTodos = false;
+let editTodoId = null;
 const memStore = {};
 
 /* ===== Speicher (mit Rückfallebene, falls localStorage gesperrt ist) ===== */
@@ -709,6 +756,7 @@ function weekPct(h, mon){
 function applyData(d){
   state.habits = Array.isArray(d.habits) ? d.habits : [];
   state.entries = (d.entries && typeof d.entries === 'object') ? d.entries : {};
+  state.todos = Array.isArray(d.todos) ? d.todos : [];
   state.updated = d.updated || 0;
   state.habits.forEach(function(h){
     if(!h.days) h.days = [];
@@ -822,10 +870,140 @@ function saveNote(hid, ds, text){
   persist();
 }
 
+/* ===== To-dos ===== */
+function purgeTodos(){
+  const limit = Date.now() - TODO_KEEP_DAYS*86400000;
+  const before = state.todos.length;
+  state.todos = state.todos.filter(function(t){
+    return !(t.done && t.doneAt && t.doneAt < limit);
+  });
+  return state.todos.length !== before;
+}
+function openTodos(){ return state.todos.filter(function(t){ return !t.done; }); }
+function todosDueToday(){
+  const tds = todayDs();
+  return openTodos().filter(function(t){ return t.due && t.due <= tds; }).sort(sortTodos);
+}
+function sortTodos(a, b){
+  if(a.due && b.due) return a.due < b.due ? -1 : (a.due > b.due ? 1 : a.created - b.created);
+  if(a.due) return -1;
+  if(b.due) return 1;
+  return a.created - b.created;
+}
+function addTodo(text, due){
+  const t = String(text || '').trim();
+  if(!t) return false;
+  state.todos.push({ id: uid(), text: t, due: due || null, done: false, doneAt: null, created: Date.now() });
+  persist();
+  return true;
+}
+function toggleTodo(id){
+  const t = state.todos.find(function(x){ return x.id === id; });
+  if(!t) return;
+  t.done = !t.done;
+  t.doneAt = t.done ? Date.now() : null;
+  persist();
+  render();
+}
+function dueChip(t){
+  if(!t.due) return '';
+  const tds = todayDs();
+  const morgen = ymd(addDays(new Date(), 1));
+  if(t.due < tds){
+    const tage = Math.round((parseYmd(tds) - parseYmd(t.due)) / 86400000);
+    return '<span class="chip rose">Überfällig · ' + tage + (tage === 1 ? ' Tag' : ' Tage') + '</span>';
+  }
+  if(t.due === tds) return '<span class="chip accent">Heute</span>';
+  if(t.due === morgen) return '<span class="chip">Morgen</span>';
+  return '<span class="chip">' + fmtShort(parseYmd(t.due)) + '</span>';
+}
+function todoRow(t){
+  return '<div class="todo-row' + (t.done ? ' done' : '') + '">' +
+    '<button class="check' + (t.done ? ' on' : '') + '" data-todo="' + t.id + '" aria-label="Abhaken"><span>✓</span></button>' +
+    '<button class="todo-main" data-todoedit="' + t.id + '">' +
+      '<div class="todo-text">' + esc(t.text) + '</div>' +
+      (t.done || !t.due ? '' : '<div class="todo-meta">' + dueChip(t) + '</div>') +
+    '</button></div>';
+}
+function todoGroup(title, arr, extra){
+  if(!arr.length) return '';
+  return '<div class="sec"><div class="sec-head"><div class="sec-title">' + title + '</div>' +
+    '<div class="sec-count">' + (extra || arr.length) + '</div></div>' +
+    '<div class="list">' + arr.map(todoRow).join('') + '</div></div>';
+}
+
+function renderTodos(){
+  const tds = todayDs();
+  const open = openTodos();
+  const over = open.filter(function(t){ return t.due && t.due < tds; }).sort(sortTodos);
+  const heute = open.filter(function(t){ return t.due === tds; }).sort(sortTodos);
+  const spaeter = open.filter(function(t){ return t.due && t.due > tds; }).sort(sortTodos);
+  const ohne = open.filter(function(t){ return !t.due; }).sort(sortTodos);
+  const erledigt = state.todos.filter(function(t){ return t.done; })
+    .sort(function(a,b){ return (b.doneAt||0) - (a.doneAt||0); });
+
+  let html = '<div class="todo-add">' +
+    '<input type="text" id="quickTodo" placeholder="Neues To‑do …" autocomplete="off">' +
+    '<input type="date" id="quickDue" aria-label="Fällig am">' +
+    '<button id="btnQuickAdd" aria-label="Hinzufügen">＋</button></div>';
+
+  if(!state.todos.length){
+    html += '<div class="empty"><b>Keine To‑dos</b><span>Trag oben ein, was einmalig ansteht. Ein Datum ist optional.</span></div>';
+    $('view-todos').innerHTML = html;
+    return;
+  }
+
+  html += todoGroup('Überfällig', over);
+  html += todoGroup('Heute', heute);
+  html += todoGroup('Demnächst', spaeter);
+  html += todoGroup('Ohne Datum', ohne);
+
+  if(!open.length) html += '<div class="empty"><b>Alles erledigt</b><span>Nichts mehr offen.</span></div>';
+
+  if(erledigt.length){
+    html += '<div class="sec"><button class="done-toggle" data-donetoggle="1">' +
+      (showDoneTodos ? '▾' : '▸') + ' Erledigt (' + erledigt.length + ')</button>';
+    if(showDoneTodos){
+      html += '<div class="list">' + erledigt.map(todoRow).join('') + '</div>' +
+        '<div class="legend">Erledigte To‑dos verschwinden nach ' + TODO_KEEP_DAYS + ' Tagen von selbst.</div>';
+    }
+    html += '</div>';
+  }
+  $('view-todos').innerHTML = html;
+}
+
+function openTodoSheet(id){
+  editTodoId = id || null;
+  const t = id ? state.todos.find(function(x){ return x.id === id; }) : null;
+  $('todoTitle').textContent = t ? 'To‑do bearbeiten' : 'Neues To‑do';
+  $('fTodoText').value = t ? t.text : '';
+  $('fTodoDue').value = t && t.due ? t.due : '';
+  $('todoActions').style.display = t ? 'grid' : 'none';
+  openOv('ovTodo');
+  setTimeout(function(){ $('fTodoText').focus(); }, 260);
+}
+
+function saveTodoSheet(){
+  const text = $('fTodoText').value.trim();
+  if(!text){ toast('Bitte eine Aufgabe eingeben'); $('fTodoText').focus(); return; }
+  const due = $('fTodoDue').value || null;
+  if(editTodoId){
+    const t = state.todos.find(function(x){ return x.id === editTodoId; });
+    if(t){ t.text = text; t.due = due; }
+    persist();
+  } else {
+    addTodo(text, due);
+  }
+  closeOv('ovTodo');
+  render();
+  toast(editTodoId ? 'To‑do gespeichert' : 'To‑do angelegt');
+}
+
 /* ===== Render: Steuerung ===== */
 function render(){
   updateBrandDots();
   if(currentView === 'today') renderToday();
+  else if(currentView === 'todos') renderTodos();
   else if(currentView === 'week') renderWeek();
   else if(currentView === 'stats') renderStats();
   else renderManage();
@@ -899,6 +1077,13 @@ function renderToday(){
     html += '<div class="list">' + due.map(function(h){ return habitRow(h, ds, mon, false); }).join('') + '</div>';
   }
   html += '</div>';
+
+  const tdo = todosDueToday();
+  if(tdo.length){
+    html += '<div class="sec"><div class="sec-head"><div class="sec-title">To‑dos fällig</div>' +
+      '<div class="sec-count">' + tdo.length + '</div></div>' +
+      '<div class="list">' + tdo.map(todoRow).join('') + '</div></div>';
+  }
 
   if(others.length){
     html += '<div class="sec"><div class="sec-head"><div class="sec-title">Heute nicht fällig</div>' +
@@ -1246,6 +1431,15 @@ function openNote(hid, ds){
   setTimeout(function(){ $('fNote').focus(); }, 260);
 }
 
+function quickAdd(){
+  const inp = $('quickTodo'); if(!inp) return;
+  const due = $('quickDue') ? $('quickDue').value || null : null;
+  if(!addTodo(inp.value, due)){ toast('Bitte eine Aufgabe eingeben'); inp.focus(); return; }
+  renderTodos();
+  const again = $('quickTodo');
+  if(again) again.focus();
+}
+
 /* ===== Initialisierung ===== */
 function buildPickers(){
   $('dayRow').innerHTML = DAY_ORDER.map(function(n){
@@ -1269,6 +1463,7 @@ function bindEvents(){
     Array.prototype.forEach.call(document.querySelectorAll('.view'), function(v){
       v.classList.toggle('active', v.id === 'view-' + currentView);
     });
+    $('fab').textContent = currentView === 'todos' ? '＋ To‑do' : '＋ Habit';
     window.scrollTo(0, 0);
     render();
   });
@@ -1279,6 +1474,18 @@ function bindEvents(){
 
     const tg = e.target.closest('[data-toggle]');
     if(tg){ toggleDay(tg.dataset.toggle, tg.dataset.ds); return; }
+
+    const td = e.target.closest('[data-todo]');
+    if(td){ toggleTodo(td.dataset.todo); return; }
+
+    const te = e.target.closest('[data-todoedit]');
+    if(te){ openTodoSheet(te.dataset.todoedit); return; }
+
+    const dt = e.target.closest('[data-donetoggle]');
+    if(dt){ showDoneTodos = !showDoneTodos; renderTodos(); return; }
+
+    const qa = e.target.closest('#btnQuickAdd');
+    if(qa){ quickAdd(); return; }
 
     const nt = e.target.closest('[data-note]');
     if(nt){ openNote(nt.dataset.note, nt.dataset.ds); return; }
@@ -1342,7 +1549,19 @@ function bindEvents(){
     if(Math.abs(e.clientX - pressXY.x) > 12 || Math.abs(e.clientY - pressXY.y) > 12) clearTimeout(pressTimer);
   });
 
-  $('fab').addEventListener('click', function(){ openHabit(null); });
+  $('fab').addEventListener('click', function(){
+    if(currentView === 'todos') openTodoSheet(null); else openHabit(null);
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && e.target && e.target.id === 'quickTodo') quickAdd();
+  });
+
+  $('btnSaveTodo').addEventListener('click', saveTodoSheet);
+  $('btnTodoDelete').addEventListener('click', function(){
+    state.todos = state.todos.filter(function(x){ return x.id !== editTodoId; });
+    persist(); closeOv('ovTodo'); render(); toast('To‑do gelöscht');
+  });
 
   $('typeSeg').addEventListener('click', function(e){
     const b = e.target.closest('button[data-type]'); if(!b) return;
@@ -1424,6 +1643,7 @@ function bindEvents(){
 function init(){
   $('verLabel').textContent = 'v' + APP_VERSION;
   loadLocal();
+  if(purgeTodos()) persist(false);
   buildPickers();
   bindEvents();
   setSync(getSecret() ? 'load' : 'local', getSecret() ? 'Verbinde …' : 'Kein Schlüssel hinterlegt');
