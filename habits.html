@@ -245,7 +245,9 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 .stat-head .t{flex:1;min-width:0}
 .stat-head .t b{display:block;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stat-head .t span{font-size:12px;color:var(--faint)}
-.ring{flex:none}
+.ring{flex:none;display:block}
+.ring-box{flex:none;text-align:center}
+.ring-cap{font-size:9.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
 .stat-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .stat-num{background:var(--line-soft);border-radius:10px;padding:8px 9px;text-align:center}
 .stat-num b{display:block;font-family:Fraunces,Georgia,serif;font-size:17px;font-weight:600}
@@ -259,6 +261,10 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 .bar.cur i{opacity:.45}
 .bar-labs{display:flex;gap:3px;font-size:9px;color:var(--faint)}
 .bar-labs span{flex:1;text-align:center;overflow:hidden}
+.line{width:100%;height:92px;display:block;overflow:visible}
+.line-labs{display:flex;justify-content:space-between;font-size:9.5px;color:var(--faint);margin-top:2px}
+.line-labs span:nth-child(2){color:#BFBDB4}
+.line-empty{font-size:12.5px;color:var(--faint);padding:14px 0 6px}
 .heat{display:flex;gap:3px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .heat::-webkit-scrollbar{display:none}
 .heat-col{display:flex;flex-direction:column;gap:3px;flex:none}
@@ -342,6 +348,28 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 .icon-grid button.on{border-color:var(--accent);background:var(--accent-soft);
   box-shadow:0 0 0 2px var(--accent-soft)}
 .icon-grid button.none{font-size:12px;font-weight:600;color:var(--muted)}
+.val-wrap{position:relative}
+.val-wrap input{width:100%;padding:12px 60px 12px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);outline:none;font-size:20px;font-weight:600;font-family:Fraunces,Georgia,serif}
+.val-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.val-unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);
+  font-size:13px;font-weight:600;pointer-events:none}
+.val-btn{
+  min-width:62px;height:34px;padding:0 10px;border-radius:10px;border:1.5px solid var(--line);
+  background:var(--card);display:grid;place-items:center;flex:none;
+}
+.val-btn b{font-family:Fraunces,Georgia,serif;font-size:15px;font-weight:600;line-height:1}
+.val-btn small{display:block;font-size:9.5px;color:var(--faint);font-weight:600;letter-spacing:.03em}
+.val-btn.on{border-color:var(--h-color,var(--accent));background:var(--h-color,var(--accent))}
+.val-btn.on b,.val-btn.on small{color:#fff}
+.val-btn.under{border-color:#EBD6D6;background:var(--rose-soft)}
+.val-btn.under b{color:var(--rose)}
+.val-btn.empty b{color:var(--faint)}
+.cell .cv{font-size:9.5px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.cell.done .cv{color:#fff}
+.cell.done.bonus .cv{color:var(--h-color,var(--accent))}
+.cell.miss .cv{color:var(--rose)}
+.cell.has-val::after{content:none!important}
 .todo-icon{font-size:17px;width:22px;text-align:center;flex:none}
 .btn{
   width:100%;padding:13px;border-radius:12px;background:var(--accent);color:#fff;
@@ -416,6 +444,45 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
       <datalist id="catList"></datalist>
     </div>
     <div class="field">
+      <label>Art</label>
+      <div class="seg" id="kindSeg">
+        <button data-kind="bool">Ja / Nein</button>
+        <button data-kind="measure">Messwert</button>
+        <button data-kind="goal">Zielwert</button>
+      </div>
+      <div class="hint" id="kindHint">Abhaken, erledigt oder nicht.</div>
+    </div>
+    <div id="wrapNum" style="display:none">
+      <div class="two">
+        <div class="field">
+          <label for="fUnit">Einheit</label>
+          <input type="text" id="fUnit" placeholder="kg, Schritte, km …" autocomplete="off" list="unitList">
+          <datalist id="unitList">
+            <option value="kg"><option value="Schritte"><option value="km"><option value="Min"><option value="Seiten">
+            <option value="ml"><option value="kcal"><option value="Stück"><option value="€"><option value="Std">
+          </datalist>
+        </div>
+        <div class="field">
+          <label for="fDec">Nachkommastellen</label>
+          <select id="fDec"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>
+        </div>
+      </div>
+      <div class="two" id="wrapGoal">
+        <div class="field">
+          <label for="fGoalVal">Ziel</label>
+          <input type="text" id="fGoalVal" inputmode="decimal" placeholder="10000"
+               autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>Richtung</label>
+          <div class="seg" id="dirSeg">
+            <button data-dir="min">mindestens</button>
+            <button data-dir="max">höchstens</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
       <label>Rhythmus</label>
       <div class="seg" id="typeSeg">
         <button data-type="daily">Täglich</button>
@@ -488,12 +555,24 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
       <h2 id="noteTitle">Notiz</h2>
       <button class="icon-btn" data-close="ovNote">✕</button>
     </div>
+    <div class="field" id="wrapValue" style="display:none">
+      <label id="valueLabel">Wert</label>
+      <div class="val-wrap">
+        <input type="text" id="fValue" inputmode="decimal" placeholder="0"
+               autocomplete="off" spellcheck="false">
+        <span class="val-unit" id="valueUnit"></span>
+      </div>
+      <div class="hint" id="valueHint"></div>
+    </div>
     <div class="field">
       <label id="noteLabel">Eintrag</label>
       <textarea id="fNote" placeholder="Wie lief es?"></textarea>
       <div class="hint" id="noteHint"></div>
     </div>
-    <button class="btn" id="btnSaveNote">Notiz speichern</button>
+    <button class="btn" id="btnSaveNote">Speichern</button>
+    <div class="btn-row" id="entryActions" style="display:none">
+      <button class="btn ghost" id="btnClearEntry" style="color:var(--rose)">Eintrag entfernen</button>
+    </div>
   </div>
 </div>
 
@@ -532,7 +611,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
 'use strict';
 
 /* ===== Konstanten ===== */
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 const KV_BASE = 'https://kv-store.neuzcore.workers.dev';
 const APP_KEY = 'habits';
 const LS_DATA = 'habits_data';
@@ -560,7 +639,7 @@ const BAR_WEEKS = 12;
 let state = { habits: [], entries: {}, todos: [], updated: 0 };
 let currentView = 'today';
 let editId = null;
-let form = { type:'daily', days:[1,3,5], color:COLORS[0], icon:'✅' };
+let form = { type:'daily', days:[1,3,5], color:COLORS[0], icon:'✅', kind:'bool', dir:'min' };
 let weekOffset = 0;
 let noteCtx = null;
 let pushTimer = null;
@@ -630,7 +709,61 @@ function isDueOn(h, d){
   return false;
 }
 function entryOf(hid, ds){ const m = state.entries[hid]; return m ? m[ds] : null; }
-function isDone(hid, ds){ return !!entryOf(hid, ds); }
+function isNum(h){ return h.kind === 'measure' || h.kind === 'goal'; }
+function entryValue(hid, ds){
+  const e = entryOf(hid, ds);
+  return (e && typeof e.v === 'number' && isFinite(e.v)) ? e.v : null;
+}
+/* Erfüllt: Ja/Nein → Eintrag vorhanden. Messwert → Wert erfasst.
+   Zielwert → Wert erreicht. Alteinträge ohne Zahl gelten als erfüllt. */
+function isDone(h, ds){
+  const e = entryOf(h.id, ds);
+  if(!e) return false;
+  if(h.kind !== 'goal') return true;
+  const v = entryValue(h.id, ds);
+  if(v === null) return true;
+  return h.dir === 'max' ? v <= h.goal : v >= h.goal;
+}
+function hasEntry(h, ds){ return !!entryOf(h.id, ds); }
+/* Nimmt Komma und Punkt an. Bei 0 Nachkommastellen koennen Trenner nur
+   Tausenderpunkte sein, deshalb werden sie dort entfernt. */
+function parseNum(raw, dec){
+  let t = String(raw == null ? '' : raw).trim().replace(/[\s\u00A0']/g, '');
+  if(!t) return null;
+  if(!dec){
+    t = t.replace(/[.,]/g, '');
+  } else {
+    const hasC = t.indexOf(',') !== -1, hasD = t.indexOf('.') !== -1;
+    if(hasC && hasD) t = t.replace(/\./g, '').replace(',', '.');
+    else if(hasC) t = t.replace(',', '.');
+  }
+  if(!/^-?\d*\.?\d*$/.test(t) || t === '' || t === '-' || t === '.') return null;
+  const v = Number(t);
+  if(!isFinite(v)) return null;
+  const f = Math.pow(10, dec || 0);
+  return Math.round(v * f) / f;
+}
+function plainNum(v, dec){
+  if(v === null || v === undefined) return '';
+  return Number(v).toFixed(dec || 0).replace('.', ',');
+}
+function fmtNum(v, dec){
+  if(v === null || v === undefined) return '–';
+  return Number(v).toLocaleString('de-DE', { minimumFractionDigits: dec||0, maximumFractionDigits: dec||0 });
+}
+function shortNum(v, dec){
+  if(v === null) return '';
+  const a = Math.abs(v);
+  if(a >= 10000) return (v/1000).toLocaleString('de-DE', { maximumFractionDigits:1 }) + 'k';
+  if(a >= 1000) return String(Math.round(v));
+  return fmtNum(v, a < 100 ? (dec||0) : 0);
+}
+function unitLabel(h){ return h.unit ? ' ' + h.unit : ''; }
+function goalLabel(h){
+  if(h.kind === 'goal') return (h.dir === 'max' ? 'höchstens ' : 'mind. ') + fmtNum(h.goal, h.dec) + unitLabel(h);
+  if(h.kind === 'measure') return 'Messwert' + (h.unit ? ' in ' + h.unit : '');
+  return '';
+}
 function rhythmLabel(h){
   if(h.type === 'daily') return 'Täglich';
   if(h.type === 'weekdays'){
@@ -648,7 +781,7 @@ function weekSlice(h, mon, capDs){
     if(!isActiveOn(h, ds)) continue;
     if(capDs && ds > capDs) continue;
     active++;
-    if(isDone(h.id, ds)) done++;
+    if(isDone(h, ds)) done++;
   }
   const target = active ? Math.max(1, Math.round((h.target||1) * active / 7)) : 0;
   return { active:active, done:done, target:target };
@@ -660,7 +793,7 @@ function weekTargetFull(h, mon){
 }
 function weekProgressNow(h, mon){
   let done = 0;
-  for(let i=0;i<7;i++){ const ds = ymd(addDays(mon,i)); if(isActiveOn(h,ds) && isDone(h.id,ds)) done++; }
+  for(let i=0;i<7;i++){ const ds = ymd(addDays(mon,i)); if(isActiveOn(h,ds) && isDone(h,ds)) done++; }
   return done;
 }
 
@@ -694,7 +827,7 @@ function computeStats(h){
     let d = parseYmd(h.start), guard = 0;
     while(ymd(d) <= lastDs && guard++ < 4000){
       const ds = ymd(d);
-      const done = isDone(h.id, ds);
+      const done = isDone(h, ds);
       if(isDueOn(h, d)){
         if(done) hit++;
         else if(ds === tds) pending++;
@@ -718,14 +851,14 @@ function dayStreaks(h){
   let cur = 0, d = parseYmd(lastDs), g = 0;
   while(ymd(d) >= h.start && g++ < 4000){
     const ds = ymd(d);
-    if(isDone(h.id, ds)) cur++;
+    if(isDone(h, ds)) cur++;
     else if(isDueOn(h, d)){ if(ds !== tds) break; }
     d = addDays(d, -1);
   }
   let best = 0, run = 0, e = parseYmd(h.start); g = 0;
   while(ymd(e) <= lastDs && g++ < 4000){
     const ds = ymd(e);
-    if(isDone(h.id, ds)){ run++; if(run > best) best = run; }
+    if(isDone(h, ds)){ run++; if(run > best) best = run; }
     else if(isDueOn(h, e) && ds !== tds) run = 0;
     e = addDays(e, 1);
   }
@@ -775,7 +908,7 @@ function failedWeeks(h){
 function dayClass(h, d, fails){
   const ds = ymd(d), tds = todayDs();
   if(!isActiveOn(h, ds)) return 'off';
-  const done = isDone(h.id, ds);
+  const done = isDone(h, ds);
   if(done) return (h.type === 'week' || isDueOn(h, d)) ? 'done' : 'done bonus';
   if(ds > tds) return isDueOn(h, d) ? 'soon' : 'idle';
   if(h.type === 'week') return (fails && fails[ymd(sow(d))]) ? 'miss' : 'idle';
@@ -793,7 +926,7 @@ function weekPct(h, mon){
   for(let i=0;i<7;i++){
     const d = addDays(mon, i), ds = ymd(d);
     if(!isActiveOn(h, ds) || ds > tds) continue;
-    const dn = isDone(h.id, ds);
+    const dn = isDone(h, ds);
     if(isDueOn(h, d)){ due++; if(dn) done++; }
     else if(dn) done++;
   }
@@ -811,6 +944,12 @@ function applyData(d){
     if(!h.target) h.target = 1;
     if(!h.color) h.color = COLORS[0];
     if(!h.icon) h.icon = '✅';
+    if(!h.kind) h.kind = 'bool';
+    if(h.kind === 'goal'){
+      if(typeof h.goal !== 'number') h.goal = 1;
+      if(h.dir !== 'max') h.dir = 'min';
+    }
+    if(isNum(h) && typeof h.dec !== 'number') h.dec = 0;
   });
 }
 function persist(touch){
@@ -1065,7 +1204,7 @@ function updateBrandDots(){
   const el = $('brandDots'); if(!el) return;
   const t = new Date(), ds = ymd(t);
   const due = dueToday(t);
-  const done = due.filter(function(h){ return isDone(h.id, ds); }).length;
+  const done = due.filter(function(h){ return isDone(h, ds); }).length;
   const ratio = due.length ? done/due.length : 0;
   let html = '';
   for(let i=0;i<3;i++) html += '<i class="' + (ratio > i/3 ? 'on' : '') + '"></i>';
@@ -1078,7 +1217,7 @@ function dueToday(t){
     if(h.archived || !isActiveOn(h, ds)) return false;
     if(h.type === 'week'){
       const mon = sow(t);
-      return isDone(h.id, ds) || weekProgressNow(h, mon) < weekTargetFull(h, mon);
+      return isDone(h, ds) || weekProgressNow(h, mon) < weekTargetFull(h, mon);
     }
     return isDueOn(h, t);
   });
@@ -1091,7 +1230,7 @@ function renderToday(){
   const due = dueToday(t);
   const dueIds = {}; due.forEach(function(h){ dueIds[h.id] = true; });
   const others = active.filter(function(h){ return !dueIds[h.id]; });
-  const doneCount = due.filter(function(h){ return isDone(h.id, ds); }).length;
+  const doneCount = due.filter(function(h){ return isDone(h, ds); }).length;
 
   /* Wochenquote bis heute über alle aktiven Habits */
   let wNum = 0, wDen = 0;
@@ -1103,7 +1242,7 @@ function renderToday(){
       for(let i=0;i<7;i++){
         const d = addDays(mon, i), dd = ymd(d);
         if(dd > ds || !isActiveOn(h, dd)) continue;
-        if(isDueOn(h, d)){ wDen++; if(isDone(h.id, dd)) wNum++; }
+        if(isDueOn(h, d)){ wDen++; if(isDone(h, dd)) wNum++; }
       }
     }
   });
@@ -1149,11 +1288,22 @@ function kpi(val, lab, cls){
   return '<div class="kpi ' + cls + '"><div class="kpi-val">' + val + '</div><div class="kpi-lab">' + lab + '</div></div>';
 }
 
+function valueButton(h, ds){
+  const v = entryValue(h.id, ds);
+  const has = hasEntry(h, ds);
+  const done = isDone(h, ds);
+  const cls = !has ? 'empty' : (done ? 'on' : 'under');
+  return '<button class="val-btn ' + cls + '" data-note="' + h.id + '" data-ds="' + ds + '" aria-label="Wert eintragen">' +
+    '<b>' + (v === null ? (has ? '✓' : '–') : fmtNum(v, h.dec)) + '</b>' +
+    (h.unit ? '<small>' + esc(h.unit) + '</small>' : '') + '</button>';
+}
+
 function habitRow(h, ds, mon, isBonus){
-  const done = isDone(h.id, ds);
+  const done = isDone(h, ds);
   const ent = entryOf(h.id, ds);
   const st = computeStats(h);
   let meta = '<span class="chip">' + esc(rhythmLabel(h)) + '</span>';
+  if(isNum(h)) meta += '<span class="chip">' + esc(goalLabel(h)) + '</span>';
   if(h.type === 'week'){
     const prog = weekProgressNow(h, mon), tgt = weekTargetFull(h, mon);
     const cls = prog >= tgt ? 'bonus' : 'accent';
@@ -1167,7 +1317,8 @@ function habitRow(h, ds, mon, isBonus){
     '<div class="row-main"><div class="row-name">' + esc(h.name) + '</div>' +
     '<div class="row-meta">' + meta + '</div></div>' +
     '<button class="row-note-btn' + (ent && ent.n ? ' has' : '') + '" data-note="' + h.id + '" data-ds="' + ds + '" aria-label="Notiz">✎</button>' +
-    '<button class="check' + (done ? ' on' : '') + '" data-toggle="' + h.id + '" data-ds="' + ds + '" aria-label="Abhaken"><span>✓</span></button>' +
+    (isNum(h) ? valueButton(h, ds)
+              : '<button class="check' + (done ? ' on' : '') + '" data-toggle="' + h.id + '" data-ds="' + ds + '" aria-label="Abhaken"><span>✓</span></button>') +
   '</div>';
 }
 
@@ -1201,11 +1352,12 @@ function renderWeek(){
 
   rows.forEach(function(h){
     const fails = failedWeeks(h);
+    const num = isNum(h);
     let extra = '';
     if(h.type === 'week'){
       const tgt = weekTargetFull(h, mon);
       let prog = 0;
-      days.forEach(function(d){ const ds = ymd(d); if(isActiveOn(h,ds) && isDone(h.id,ds)) prog++; });
+      days.forEach(function(d){ const ds = ymd(d); if(isActiveOn(h,ds) && isDone(h,ds)) prog++; });
       extra = '<span class="chip ' + (tgt && prog >= tgt ? 'bonus' : 'accent') + '" style="margin-left:6px">' + prog + '/' + tgt + '</span>';
     }
     html += '<div class="grid-row" style="--h-color:' + h.color + '">' +
@@ -1216,9 +1368,16 @@ function renderWeek(){
       const ent = entryOf(h.id, ds);
       const future = ds > tds;
       const disabled = cls === 'off' || future;
-      html += '<button class="cell ' + cls + (ds === tds ? ' tdy' : '') + (ent && ent.n ? ' hasnote' : '') + '"' +
-        (disabled ? ' disabled' : ' data-cell="' + h.id + '" data-ds="' + ds + '"') +
-        ' aria-label="' + esc(h.name) + ' ' + fmtShort(d) + '"></button>';
+      const v = num ? entryValue(h.id, ds) : null;
+      const showVal = v !== null;
+      let cellCls = cls;
+      if(num && hasEntry(h, ds) && !isDone(h, ds)) cellCls = 'miss';
+      html += '<button class="cell ' + cellCls + (ds === tds ? ' tdy' : '') + (showVal ? ' has-val' : '') +
+        (ent && ent.n ? ' hasnote' : '') + '"' +
+        (disabled ? ' disabled' : (num ? ' data-val="' + h.id + '" data-ds="' + ds + '"'
+                                       : ' data-cell="' + h.id + '" data-ds="' + ds + '"')) +
+        ' aria-label="' + esc(h.name) + ' ' + fmtShort(d) + (showVal ? ': ' + fmtNum(v, h.dec) : '') + '">' +
+        (showVal ? '<span class="cv">' + shortNum(v, h.dec) + '</span>' : '') + '</button>';
     });
     html += '</div>';
   });
@@ -1255,14 +1414,14 @@ function renderStats(){
 function statCard(h){
   const s = computeStats(h);
   const pct = s.quote === null ? null : Math.round(s.quote*100);
-  let sub = rhythmLabel(h) + ' · ab ' + fmtShort(parseYmd(h.start));
+  let sub = rhythmLabel(h) + (isNum(h) ? ' · ' + goalLabel(h) : '') + ' · ab ' + fmtShort(parseYmd(h.start));
   if(h.end) sub += ' bis ' + fmtShort(parseYmd(h.end));
   if(h.archived) sub += ' · archiviert';
 
   let html = '<div class="stat-card" style="--h-color:' + h.color + '">';
   html += '<div class="stat-head"><em>' + esc(h.icon) + '</em>' +
     '<div class="t"><b>' + esc(h.name) + '</b><span>' + esc(sub) + '</span></div>' +
-    ring(pct, h.color) + '</div>';
+    ringBox(h, pct) + '</div>';
 
   if(h.type === 'week' && s.curTarget){
     html += '<div class="sub-lab">Laufende Woche (zählt noch nicht zur Quote)</div>' +
@@ -1272,18 +1431,34 @@ function statCard(h){
       s.curDone + '/' + s.curTarget + '</span></div>';
   }
 
-  html += '<div class="stat-nums">' +
-    '<div class="stat-num"><b>' + s.streak + '</b><span>Serie (' + s.unit + ')</span></div>' +
-    '<div class="stat-num"><b>' + s.best + '</b><span>Bestwert</span></div>' +
-    '<div class="stat-num"><b>' + s.hit + (s.bonus ? '<span style="color:var(--green);font-size:12px"> +' + s.bonus + '</span>' : '') + '</b><span>Erledigt</span></div>' +
-    '</div>';
-
-  html += '<div class="sub-lab">Letzte ' + BAR_WEEKS + ' Wochen</div>' + barsHtml(h);
+  if(isNum(h)){
+    const nv = numStats(h);
+    html += '<div class="stat-nums">' +
+      '<div class="stat-num"><b>' + (nv.last === null ? '–' : fmtNum(nv.last, h.dec)) + '</b><span>Zuletzt</span></div>' +
+      '<div class="stat-num"><b>' + (nv.avg === null ? '–' : fmtNum(nv.avg, h.dec)) + '</b><span>Ø</span></div>' +
+      '<div class="stat-num"><b>' + (h.kind === 'goal'
+          ? s.streak
+          : (nv.delta === null ? '–' : (nv.delta > 0 ? '+' : '') + fmtNum(nv.delta, h.dec))) +
+        '</b><span>' + (h.kind === 'goal' ? 'Serie (' + s.unit + ')' : 'Veränderung') + '</span></div>' +
+      '</div>';
+    html += '<div class="sub-lab">Werteverlauf' + (h.unit ? ' (' + esc(h.unit) + ')' : '') + '</div>' + lineHtml(h);
+  } else {
+    html += '<div class="stat-nums">' +
+      '<div class="stat-num"><b>' + s.streak + '</b><span>Serie (' + s.unit + ')</span></div>' +
+      '<div class="stat-num"><b>' + s.best + '</b><span>Bestwert</span></div>' +
+      '<div class="stat-num"><b>' + s.hit + (s.bonus ? '<span style="color:var(--green);font-size:12px"> +' + s.bonus + '</span>' : '') + '</b><span>Erledigt</span></div>' +
+      '</div>';
+    html += '<div class="sub-lab">Letzte ' + BAR_WEEKS + ' Wochen</div>' + barsHtml(h);
+  }
   html += '<div class="sub-lab" style="margin-top:12px">Verlauf</div>' + heatHtml(h);
   html += '</div>';
   return html;
 }
 
+function ringBox(h, pct){
+  return '<div class="ring-box">' + ring(pct, h.color) +
+    '<div class="ring-cap">' + (h.kind === 'measure' ? 'erfasst' : 'Quote') + '</div></div>';
+}
 function ring(pct, color){
   const r = 22, c = 2*Math.PI*r;
   const p = pct === null ? 0 : Math.max(0, Math.min(100, pct));
@@ -1294,6 +1469,75 @@ function ring(pct, color){
     'stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 28 28)"></circle>' +
     '<text x="28" y="32" text-anchor="middle" font-size="14" font-weight="600" fill="#1B1A22" font-family="Inter,sans-serif">' +
     (pct === null ? '–' : pct) + '</text></svg>';
+}
+
+function numSeries(h, days){
+  const tds = todayDs();
+  const from = ymd(addDays(new Date(), -(days-1)));
+  const out = [];
+  const m = state.entries[h.id] || {};
+  Object.keys(m).sort().forEach(function(ds){
+    if(ds < from || ds > tds) return;
+    const v = entryValue(h.id, ds);
+    if(v !== null) out.push({ ds: ds, v: v });
+  });
+  return out;
+}
+
+function numStats(h){
+  const all = numSeries(h, 3650);
+  if(!all.length) return { last:null, avg:null, min:null, max:null, delta:null, n:0 };
+  const recent = numSeries(h, 30);
+  const base = recent.length ? recent : all;
+  let sum = 0, min = base[0].v, max = base[0].v;
+  base.forEach(function(p){ sum += p.v; if(p.v < min) min = p.v; if(p.v > max) max = p.v; });
+  const last = all[all.length-1].v;
+  const delta = all.length > 1 ? last - all[0].v : null;
+  return { last:last, avg: sum/base.length, min:min, max:max, delta:delta, n: all.length };
+}
+
+function lineHtml(h){
+  const pts = numSeries(h, 90);
+  if(pts.length < 1){
+    return '<div class="line-empty">Noch keine Werte erfasst.</div>';
+  }
+  const W = 320, H = 92, PL = 4, PR = 4, PT = 8, PB = 14;
+  let lo = pts[0].v, hi = pts[0].v;
+  pts.forEach(function(p){ if(p.v < lo) lo = p.v; if(p.v > hi) hi = p.v; });
+  if(h.kind === 'goal'){ if(h.goal < lo) lo = h.goal; if(h.goal > hi) hi = h.goal; }
+  if(hi === lo){ hi = lo + 1; lo = lo - 1; }
+  const pad = (hi - lo) * 0.12;
+  lo -= pad; hi += pad;
+  const t0 = parseYmd(pts[0].ds).getTime();
+  const t1 = parseYmd(pts[pts.length-1].ds).getTime();
+  const span = Math.max(1, t1 - t0);
+  const X = function(ds){ return PL + (parseYmd(ds).getTime() - t0) / span * (W - PL - PR); };
+  const Y = function(v){ return PT + (1 - (v - lo) / (hi - lo)) * (H - PT - PB); };
+
+  let path = '', dots = '';
+  pts.forEach(function(p, i){
+    const x = pts.length === 1 ? W/2 : X(p.ds), y = Y(p.v);
+    path += (i ? ' L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    if(pts.length <= 60) dots += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2.1" fill="' + h.color + '"></circle>';
+  });
+
+  let goalLine = '';
+  if(h.kind === 'goal'){
+    const gy = Y(h.goal).toFixed(1);
+    goalLine = '<line x1="' + PL + '" y1="' + gy + '" x2="' + (W-PR) + '" y2="' + gy + '" ' +
+      'stroke="#C9C6BE" stroke-width="1" stroke-dasharray="4 3"></line>' +
+      '<text x="' + (W-PR) + '" y="' + (Number(gy) - 3) + '" text-anchor="end" font-size="8.5" fill="#9C9BA8" ' +
+      'font-family="Inter,sans-serif">Ziel ' + esc(fmtNum(h.goal, h.dec)) + '</text>';
+  }
+
+  return '<svg class="line" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" ' +
+    'aria-label="Werteverlauf">' + goalLine +
+    (pts.length > 1 ? '<path d="' + path + '" fill="none" stroke="' + h.color +
+      '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"></path>' : '') +
+    dots + '</svg>' +
+    '<div class="line-labs"><span>' + fmtShort(parseYmd(pts[0].ds)) + '</span>' +
+    '<span>' + fmtNum(lo + (hi-lo)/2, h.dec) + ' Ø‑Bereich</span>' +
+    '<span>' + fmtShort(parseYmd(pts[pts.length-1].ds)) + '</span></div>';
 }
 
 function barsHtml(h){
@@ -1395,6 +1639,12 @@ function openHabit(id){
   form.color = h ? h.color : COLORS[0];
   form.days = h && h.days && h.days.length ? h.days.slice() : [1,3,5];
   form.type = h ? (h.type === 'week' && h.target === 1 ? 'weekly' : h.type) : 'daily';
+  form.kind = h ? (h.kind || 'bool') : 'bool';
+  form.dir = h && h.dir === 'max' ? 'max' : 'min';
+  $('fUnit').value = h && h.unit ? h.unit : '';
+  $('fDec').value = h && typeof h.dec === 'number' ? String(h.dec) : '0';
+  $('fGoalVal').value = (h && h.kind === 'goal' && typeof h.goal === 'number')
+    ? plainNum(h.goal, h.dec || 0) : '';
   $('fIcon').value = form.icon;
   $('editActions').style.display = h ? 'grid' : 'none';
   $('btnArchive').textContent = (h && h.archived) ? 'Aktivieren' : 'Archivieren';
@@ -1404,10 +1654,24 @@ function openHabit(id){
   if(!h) setTimeout(function(){ $('fName').focus(); }, 260);
 }
 
+const KIND_HINTS = {
+  bool: 'Abhaken, erledigt oder nicht.',
+  measure: 'Zahl eintragen, ohne Ziel – z. B. Gewicht. Erfasst zählt als erledigt.',
+  goal: 'Zahl eintragen und ein Ziel erreichen – z. B. 10.000 Schritte.'
+};
 function syncForm(){
   Array.prototype.forEach.call(document.querySelectorAll('#typeSeg button'), function(b){
     b.classList.toggle('on', b.dataset.type === form.type);
   });
+  Array.prototype.forEach.call(document.querySelectorAll('#kindSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.kind === form.kind);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#dirSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.dir === form.dir);
+  });
+  $('kindHint').textContent = KIND_HINTS[form.kind];
+  $('wrapNum').style.display = form.kind === 'bool' ? 'none' : 'block';
+  $('wrapGoal').style.display = form.kind === 'goal' ? 'grid' : 'none';
   $('wrapDays').style.display = form.type === 'weekdays' ? 'block' : 'none';
   $('wrapTarget').style.display = form.type === 'week' ? 'block' : 'none';
   Array.prototype.forEach.call(document.querySelectorAll('#dayRow button'), function(b){
@@ -1438,8 +1702,20 @@ function saveHabit(){
   if(type === 'weekly'){ type = 'week'; target = 1; }
   else if(type === 'week'){ target = Math.max(1, Math.min(7, Number($('fTarget').value) || 1)); }
 
+  const decVal = form.kind === 'bool' ? 0 : (Number($('fDec').value) || 0);
+  let goalVal = null;
+  if(form.kind === 'goal'){
+    goalVal = parseNum($('fGoalVal').value, decVal);
+    if(goalVal === null){ toast('Bitte ein Ziel angeben'); $('fGoalVal').focus(); return; }
+  }
+
   const data = {
     name: name,
+    kind: form.kind,
+    unit: form.kind === 'bool' ? '' : $('fUnit').value.trim(),
+    dec: decVal,
+    goal: form.kind === 'goal' ? goalVal : null,
+    dir: form.kind === 'goal' ? form.dir : 'min',
     icon: $('fIcon').value.trim() || '✅',
     color: form.color,
     category: $('fCat').value.trim(),
@@ -1477,12 +1753,65 @@ function openNote(hid, ds){
   if(!h) return;
   noteCtx = { hid: hid, ds: ds };
   const ent = entryOf(hid, ds);
+  const num = isNum(h);
   $('noteTitle').textContent = h.name;
-  $('noteLabel').textContent = fmtLong(parseYmd(ds));
+  $('noteLabel').textContent = num ? 'Notiz' : fmtLong(parseYmd(ds));
   $('fNote').value = ent && ent.n ? ent.n : '';
-  $('noteHint').textContent = ent ? 'Eintrag ist abgehakt.' : 'Noch nicht abgehakt – eine Notiz hakt den Tag mit ab.';
+  $('wrapValue').style.display = num ? 'block' : 'none';
+  $('entryActions').style.display = ent ? 'grid' : 'none';
+  if(num){
+    const v = entryValue(hid, ds);
+    $('valueLabel').textContent = fmtLong(parseYmd(ds));
+    $('fValue').value = plainNum(v, h.dec);
+    $('valueUnit').textContent = h.unit || '';
+    $('valueHint').textContent = h.kind === 'goal'
+      ? 'Ziel: ' + goalLabel(h) + '. Darunter zählt der Tag als nicht erfüllt.'
+      : 'Leer lassen und speichern entfernt den Eintrag.';
+    $('noteHint').textContent = '';
+  } else {
+    $('noteHint').textContent = ent ? 'Eintrag ist abgehakt.' : 'Noch nicht abgehakt – eine Notiz hakt den Tag mit ab.';
+  }
   openOv('ovNote');
-  setTimeout(function(){ $('fNote').focus(); }, 260);
+  setTimeout(function(){ (num ? $('fValue') : $('fNote')).focus(); }, 260);
+}
+
+function saveEntrySheet(){
+  if(!noteCtx) return;
+  const h = state.habits.find(function(x){ return x.id === noteCtx.hid; });
+  if(!h) return;
+  const text = $('fNote').value.trim();
+  if(isNum(h)){
+    const raw = String($('fValue').value).trim();
+    if(raw === ''){
+      if(!text){ clearEntry(); return; }
+      saveNote(noteCtx.hid, noteCtx.ds, text);
+    } else {
+      const v = parseNum(raw, h.dec);
+      if(v === null){ toast('Bitte eine gültige Zahl eingeben'); $('fValue').focus(); return; }
+      setValue(noteCtx.hid, noteCtx.ds, v, text);
+    }
+  } else {
+    saveNote(noteCtx.hid, noteCtx.ds, text);
+  }
+  closeOv('ovNote'); render(); toast('Gespeichert');
+}
+
+function clearEntry(){
+  if(!noteCtx) return;
+  const m = state.entries[noteCtx.hid];
+  if(m) delete m[noteCtx.ds];
+  persist();
+  closeOv('ovNote'); render(); toast('Eintrag entfernt');
+}
+
+function setValue(hid, ds, v, note){
+  if(ds > todayDs()){ toast('Zukünftige Tage lassen sich nicht eintragen'); return; }
+  if(!state.entries[hid]) state.entries[hid] = {};
+  const m = state.entries[hid];
+  if(!m[ds]) m[ds] = { t: Date.now() };
+  m[ds].v = v;
+  if(note) m[ds].n = note; else delete m[ds].n;
+  persist();
 }
 
 function quickAdd(){
@@ -1547,6 +1876,9 @@ function bindEvents(){
 
     const tg = e.target.closest('[data-toggle]');
     if(tg){ toggleDay(tg.dataset.toggle, tg.dataset.ds); return; }
+
+    const vc = e.target.closest('[data-val]');
+    if(vc){ openNote(vc.dataset.val, vc.dataset.ds); return; }
 
     const td = e.target.closest('[data-todo]');
     if(td){ toggleTodo(td.dataset.todo); return; }
@@ -1642,6 +1974,14 @@ function bindEvents(){
     persist(); closeOv('ovTodo'); render(); toast('To‑do gelöscht');
   });
 
+  $('kindSeg').addEventListener('click', function(e){
+    const b = e.target.closest('button[data-kind]'); if(!b) return;
+    form.kind = b.dataset.kind; syncForm();
+  });
+  $('dirSeg').addEventListener('click', function(e){
+    const b = e.target.closest('button[data-dir]'); if(!b) return;
+    form.dir = b.dataset.dir; syncForm();
+  });
   $('typeSeg').addEventListener('click', function(e){
     const b = e.target.closest('button[data-type]'); if(!b) return;
     form.type = b.dataset.type; syncForm();
@@ -1677,11 +2017,8 @@ function bindEvents(){
     toast('In den Papierkorb verschoben');
   });
 
-  $('btnSaveNote').addEventListener('click', function(){
-    if(!noteCtx) return;
-    saveNote(noteCtx.hid, noteCtx.ds, $('fNote').value.trim());
-    closeOv('ovNote'); render(); toast('Notiz gespeichert');
-  });
+  $('btnSaveNote').addEventListener('click', saveEntrySheet);
+  $('btnClearEntry').addEventListener('click', clearEntry);
 
   $('btnSync').addEventListener('click', function(){
     $('fSecret').value = getSecret();
