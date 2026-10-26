@@ -80,7 +80,8 @@ header{
 .sync-chip.err i{background:var(--rose)}
 @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.25}}
 .secret-wrap{position:relative}
-.secret-wrap input{padding-right:86px!important;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}
+.secret-wrap input{padding-right:86px!important;
+  font-family:ui-monospace,Menlo,Consolas,monospace!important;letter-spacing:.01em}
 .reveal-btn{
   position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:6px 10px;border-radius:8px;
   font-size:12px;font-weight:600;color:var(--muted);background:var(--line-soft);
@@ -107,7 +108,8 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:12px 13px;box-shadow:var(--shadow);
 }
-.kpi-val{font-family:Fraunces,Georgia,serif;font-size:26px;font-weight:600;line-height:1.1;letter-spacing:-.02em}
+.kpi-val{font-family:Fraunces,Georgia,serif;font-size:26px;font-weight:600;line-height:1.1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .kpi-val small{font-size:14px;color:var(--faint);font-family:Inter,sans-serif;font-weight:500}
 .kpi-lab{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
 .kpi.amber .kpi-val{color:var(--amber)}
@@ -166,11 +168,13 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 }
 .todo-add input[type=text]{flex:1;min-width:0;border:none;outline:none;background:none;padding:5px 2px}
 .todo-add input[type=date]{border:none;outline:none;background:var(--line-soft);border-radius:8px;
-  padding:6px 8px;font-size:12px;color:var(--muted);max-width:132px}
+  padding:6px 8px;color:var(--muted);max-width:146px}
 .todo-add button{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#fff;
   font-size:19px;line-height:1;flex:none}
 .done-toggle{width:100%;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;
   letter-spacing:.08em;color:var(--muted);padding:4px 2px 9px}
+.row.leaving{animation:rowOut .26s ease forwards;pointer-events:none}
+@keyframes rowOut{to{opacity:0;transform:translateX(16px)}}
 .empty{
   text-align:center;padding:34px 18px;color:var(--muted);background:var(--card);
   border:1px dashed var(--line);border-radius:var(--radius-lg);
@@ -250,7 +254,8 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 .ring-cap{font-size:9.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
 .stat-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .stat-num{background:var(--line-soft);border-radius:10px;padding:8px 9px;text-align:center}
-.stat-num b{display:block;font-family:Fraunces,Georgia,serif;font-size:17px;font-weight:600}
+.stat-num b{display:block;font-family:Fraunces,Georgia,serif;font-size:17px;font-weight:600;
+  font-variant-numeric:tabular-nums}
 .stat-num span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .sub-lab{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
   color:var(--faint);margin:0 0 6px}
@@ -319,9 +324,20 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
   text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
 .field input[type=text],.field input[type=date],.field input[type=number],
 .field select,.field textarea{
-  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
   background:var(--card);outline:none;
 }
+/* Eingabefelder tragen durchgehend die Textschrift, nie die Display-Serife.
+   16px, weil iOS Safari bei kleinerer Schrift beim Antippen hineinzoomt. */
+.field input,.field select,.field textarea,
+.val-wrap input,.secret-wrap input,
+.todo-add input[type=text],.todo-add input[type=date]{
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;
+  font-weight:400;
+  line-height:1.3;
+}
+.field input[type=number],.val-wrap input,#fGoalVal,#fTarget{font-variant-numeric:tabular-nums}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .field textarea{resize:vertical;min-height:70px}
 .field .hint{font-size:11.5px;color:var(--faint);margin-top:5px}
@@ -348,9 +364,59 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
 .icon-grid button.on{border-color:var(--accent);background:var(--accent-soft);
   box-shadow:0 0 0 2px var(--accent-soft)}
 .icon-grid button.none{font-size:12px;font-weight:600;color:var(--muted)}
+.goal-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.goal-card.closed{opacity:.72}
+.goal-head{display:flex;align-items:flex-start;gap:11px;margin-bottom:11px}
+.goal-head em{font-style:normal;font-size:21px;line-height:1.2}
+.goal-head .t{flex:1;min-width:0}
+.goal-head .t b{display:block;font-weight:600;font-size:15.5px;word-break:break-word}
+.goal-head .t span{font-size:12px;color:var(--faint)}
+.goal-nums{display:flex;align-items:baseline;gap:7px;margin-bottom:5px}
+.goal-nums b{font-family:Fraunces,Georgia,serif;font-size:23px;font-weight:600;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--g-color,var(--accent))}
+.goal-nums span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.goal-nums .pct{margin-left:auto;font-size:13px;font-weight:600;color:var(--muted)}
+.gbar-wrap{position:relative;padding:5px 0 3px}
+.gbar{height:9px;border-radius:5px;background:var(--line-soft);overflow:hidden}
+.gbar i{display:block;height:100%;background:var(--g-color,var(--accent));border-radius:5px;
+  transition:width .3s ease}
+.gbar-wrap .soll{position:absolute;top:1px;bottom:-1px;width:2px;background:var(--ink);opacity:.4;
+  border-radius:1px}
+.gbar-wrap .soll::after{content:"";position:absolute;top:-4px;left:-2px;width:6px;height:6px;
+  border-radius:50%;background:var(--ink);opacity:.55}
+.goal-pace{display:flex;align-items:center;gap:7px;font-size:12px;margin-top:7px;flex-wrap:wrap}
+.pace-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
+.pace-tag.ahead{background:#EAF3EE;color:var(--green)}
+.pace-tag.behind{background:var(--rose-soft);color:var(--rose)}
+.pace-tag.even{background:var(--accent-soft);color:var(--accent)}
+.pace-tag.done{background:var(--amber-soft);color:#8A5F13}
+.goal-rest{color:var(--faint);font-size:11.5px;margin-left:auto}
+.steps{margin-top:12px;border-top:1px solid var(--line-soft);padding-top:9px}
+.step{display:flex;align-items:center;gap:9px;padding:5px 0}
+.step .sbox{width:21px;height:21px;border-radius:7px;border:1.5px solid var(--line);flex:none;
+  display:grid;place-items:center;font-size:12px;color:transparent;line-height:1}
+.step.on .sbox{background:var(--g-color,var(--accent));border-color:var(--g-color,var(--accent));color:#fff}
+.step .stxt{flex:1;min-width:0;font-size:13.5px;text-align:left;word-break:break-word}
+.step.on .stxt{text-decoration:line-through;color:var(--faint)}
+.step .sdel{width:24px;height:24px;border-radius:6px;color:var(--faint);font-size:13px;flex:none}
+.step-add{display:flex;gap:7px;align-items:center;margin-top:6px}
+.step-add input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:7px 10px;
+  background:var(--card);outline:none;font-size:16px}
+.step-add button{width:32px;height:32px;border-radius:9px;background:var(--line-soft);
+  color:var(--muted);font-size:17px;flex:none}
+.goal-acts{display:flex;gap:7px;margin-top:11px}
+.goal-log{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:8px}
+.log-row{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:13px}
+.log-row .d{color:var(--faint);font-size:12px;min-width:52px;font-variant-numeric:tabular-nums}
+.log-row .v{font-weight:600;font-variant-numeric:tabular-nums}
+.log-row .nt{color:var(--faint);font-size:12px;flex:1;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.log-row .x{width:24px;height:24px;border-radius:6px;color:var(--faint);font-size:13px;flex:none}
 .val-wrap{position:relative}
-.val-wrap input{width:100%;padding:12px 60px 12px 12px;border:1px solid var(--line);border-radius:10px;
-  background:var(--card);outline:none;font-size:20px;font-weight:600;font-family:Fraunces,Georgia,serif}
+.val-wrap input{width:100%;padding:13px 62px 13px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);outline:none;font-size:22px!important;font-weight:600!important;
+  letter-spacing:-.01em}
 .val-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .val-unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);
   font-size:13px;font-weight:600;pointer-events:none}
@@ -358,14 +424,16 @@ main{padding:16px 16px 96px;max-width:760px;margin:0 auto}
   min-width:62px;height:34px;padding:0 10px;border-radius:10px;border:1.5px solid var(--line);
   background:var(--card);display:grid;place-items:center;flex:none;
 }
-.val-btn b{font-family:Fraunces,Georgia,serif;font-size:15px;font-weight:600;line-height:1}
+.val-btn b{font-family:Fraunces,Georgia,serif;font-size:15px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums}
 .val-btn small{display:block;font-size:9.5px;color:var(--faint);font-weight:600;letter-spacing:.03em}
 .val-btn.on{border-color:var(--h-color,var(--accent));background:var(--h-color,var(--accent))}
 .val-btn.on b,.val-btn.on small{color:#fff}
 .val-btn.under{border-color:#EBD6D6;background:var(--rose-soft)}
 .val-btn.under b{color:var(--rose)}
 .val-btn.empty b{color:var(--faint)}
-.cell .cv{font-size:9.5px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.cell .cv{font-size:9.5px;font-weight:700;line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
 .cell.done .cv{color:#fff}
 .cell.done.bonus .cv{color:var(--h-color,var(--accent))}
 .cell.miss .cv{color:var(--rose)}
@@ -402,6 +470,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
   <nav class="tabs" id="tabs">
     <button data-view="today" class="active">Heute</button>
     <button data-view="todos">To‑dos</button>
+    <button data-view="goals">Ziele</button>
     <button data-view="week">Woche</button>
     <button data-view="stats">Statistik</button>
     <button data-view="manage">Verwalten</button>
@@ -411,6 +480,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
 <main>
   <section class="view active" id="view-today"></section>
   <section class="view" id="view-todos"></section>
+  <section class="view" id="view-goals"></section>
   <section class="view" id="view-week"></section>
   <section class="view" id="view-stats"></section>
   <section class="view" id="view-manage"></section>
@@ -522,6 +592,104 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
   </div>
 </div>
 
+<!-- Ziel anlegen / bearbeiten -->
+<div class="overlay" id="ovGoal">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="goalTitle">Neues Ziel</h2>
+      <button class="icon-btn" data-close="ovGoal">✕</button>
+    </div>
+    <div class="field">
+      <label for="fGName">Ziel</label>
+      <input type="text" id="fGName" placeholder="z. B. 2.500 km Radfahren" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Art</label>
+      <div class="seg" id="gKindSeg">
+        <button data-gkind="number">Zahlenziel</button>
+        <button data-gkind="project">Vorhaben</button>
+      </div>
+      <div class="hint" id="gKindHint"></div>
+    </div>
+    <div id="wrapGNum" style="display:none">
+      <div class="two">
+        <div class="field">
+          <label for="fGTarget">Zielwert</label>
+          <input type="text" id="fGTarget" inputmode="decimal" placeholder="2500" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="fGUnit">Einheit</label>
+          <input type="text" id="fGUnit" placeholder="km, Seiten …" autocomplete="off" list="unitList">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fGDec">Nachkommastellen</label>
+        <select id="fGDec"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Zeitraum</label>
+      <div class="seg" id="gModeSeg">
+        <button data-gmode="year">Kalenderjahr</button>
+        <button data-gmode="custom">Freier Zeitraum</button>
+      </div>
+    </div>
+    <div class="field" id="wrapGYear">
+      <label for="fGYear">Jahr</label>
+      <select id="fGYear"></select>
+    </div>
+    <div class="two" id="wrapGRange" style="display:none">
+      <div class="field">
+        <label for="fGStart">Start</label>
+        <input type="date" id="fGStart">
+      </div>
+      <div class="field">
+        <label for="fGEnd">Ende</label>
+        <input type="date" id="fGEnd">
+      </div>
+    </div>
+    <div class="field">
+      <label>Symbol</label>
+      <div class="icon-picker" id="goalIconRow"></div>
+    </div>
+    <div class="field">
+      <label>Farbe</label>
+      <div class="swatches" id="goalSwatches"></div>
+    </div>
+    <button class="btn" id="btnSaveGoal">Speichern</button>
+    <div class="btn-row" id="goalActions" style="display:none">
+      <button class="btn ghost" id="btnDeleteGoal" style="color:var(--rose)">Ziel löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fortschritt eintragen -->
+<div class="overlay" id="ovGoalEntry">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="geTitle">Fortschritt</h2>
+      <button class="icon-btn" data-close="ovGoalEntry">✕</button>
+    </div>
+    <div class="field">
+      <label id="geValueLabel">Wert</label>
+      <div class="val-wrap">
+        <input type="text" id="fGeValue" inputmode="decimal" placeholder="0" autocomplete="off">
+        <span class="val-unit" id="geUnit"></span>
+      </div>
+      <div class="hint" id="geHint"></div>
+    </div>
+    <div class="field">
+      <label for="fGeDate">Datum</label>
+      <input type="date" id="fGeDate">
+    </div>
+    <div class="field">
+      <label for="fGeNote">Notiz (optional)</label>
+      <input type="text" id="fGeNote" placeholder="z. B. Tour am Bodensee" autocomplete="off">
+    </div>
+    <button class="btn" id="btnSaveGoalEntry">Eintragen</button>
+  </div>
+</div>
+
 <!-- To-do bearbeiten -->
 <div class="overlay" id="ovTodo">
   <div class="sheet">
@@ -611,7 +779,7 @@ footer{text-align:center;padding:0 16px 26px;color:var(--faint);font-size:11.5px
 'use strict';
 
 /* ===== Konstanten ===== */
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.6.0';
 const KV_BASE = 'https://kv-store.neuzcore.workers.dev';
 const APP_KEY = 'habits';
 const LS_DATA = 'habits_data';
@@ -636,7 +804,7 @@ const SYNC_LABELS = { local:'Lokal', load:'Lade …', save:'Speichere …', ok:'
 const BAR_WEEKS = 12;
 
 /* ===== Zustand ===== */
-let state = { habits: [], entries: {}, todos: [], updated: 0 };
+let state = { habits: [], entries: {}, todos: [], goals: [], updated: 0 };
 let currentView = 'today';
 let editId = null;
 let form = { type:'daily', days:[1,3,5], color:COLORS[0], icon:'✅', kind:'bool', dir:'min' };
@@ -649,8 +817,13 @@ let pressXY = null;
 let syncState = 'local';
 let showArchived = false;
 let showDoneTodos = false;
+let showDoneToday = false;
 let editTodoId = null;
 let todoIcon = '';
+let editGoalId = null;
+let goalEntryId = null;
+let gform = { kind:'number', mode:'year', icon:'🎯', color:COLORS[0] };
+let openLogs = {};
 const memStore = {};
 
 /* ===== Speicher (mit Rückfallebene, falls localStorage gesperrt ist) ===== */
@@ -938,6 +1111,15 @@ function applyData(d){
   state.habits = Array.isArray(d.habits) ? d.habits : [];
   state.entries = (d.entries && typeof d.entries === 'object') ? d.entries : {};
   state.todos = Array.isArray(d.todos) ? d.todos : [];
+  state.goals = Array.isArray(d.goals) ? d.goals : [];
+  state.goals.forEach(function(g){
+    if(!g.kind) g.kind = 'number';
+    if(!g.color) g.color = COLORS[0];
+    if(!g.icon) g.icon = '🎯';
+    if(!Array.isArray(g.steps)) g.steps = [];
+    if(!Array.isArray(g.entries)) g.entries = [];
+    if(typeof g.dec !== 'number') g.dec = 0;
+  });
   state.updated = d.updated || 0;
   state.habits.forEach(function(h){
     if(!h.days) h.days = [];
@@ -1034,7 +1216,7 @@ function schedulePush(){
 }
 
 /* ===== Aktionen ===== */
-function toggleDay(hid, ds){
+function toggleDay(hid, ds, fadeRow){
   if(ds > todayDs()){ toast('Zukünftige Tage lassen sich nicht abhaken'); return; }
   if(!state.entries[hid]) state.entries[hid] = {};
   const m = state.entries[hid];
@@ -1044,7 +1226,14 @@ function toggleDay(hid, ds){
     m[ds] = { t: Date.now() };
   }
   persist();
-  render();
+  if(fadeRow){
+    fadeRow.classList.add('leaving');
+    const chk = fadeRow.querySelector('.check');
+    if(chk) chk.classList.add('on');
+    setTimeout(render, 260);
+  } else {
+    render();
+  }
 }
 function saveNote(hid, ds, text){
   if(!state.entries[hid]) state.entries[hid] = {};
@@ -1190,11 +1379,85 @@ function saveTodoSheet(){
   toast(editTodoId ? 'To‑do gespeichert' : 'To‑do angelegt');
 }
 
+/* ===== Ziele ===== */
+function goalSum(g){
+  return (g.entries || []).reduce(function(a, e){
+    return a + (typeof e.v === 'number' && isFinite(e.v) ? e.v : 0);
+  }, 0);
+}
+function goalProgress(g){
+  if(g.kind === 'number'){
+    const cur = goalSum(g), tgt = Number(g.target) || 0;
+    return { cur:cur, target:tgt, pct: tgt > 0 ? cur/tgt : 0 };
+  }
+  const steps = g.steps || [];
+  if(steps.length){
+    const d = steps.filter(function(s){ return s.done; }).length;
+    return { cur:d, target:steps.length, pct: d/steps.length };
+  }
+  return { cur: g.done ? 1 : 0, target:1, pct: g.done ? 1 : 0 };
+}
+/* Anteil des Zeitraums, der heute verstrichen ist. Der laufende Tag zählt mit. */
+function goalPace(g){
+  const tds = todayDs();
+  if(tds < g.start) return { state:'future', frac:0, rest: dayDiff(g.start, tds) };
+  if(tds > g.end) return { state:'past', frac:1, rest:0 };
+  const total = dayDiff(g.end, g.start) + 1;
+  const done = dayDiff(tds, g.start) + 1;
+  return { state:'running', frac: Math.min(1, done/total), rest: dayDiff(g.end, tds) };
+}
+function dayDiff(a, b){
+  return Math.round((parseYmd(a).getTime() - parseYmd(b).getTime()) / 86400000);
+}
+function goalPhase(g){
+  const tds = todayDs();
+  if(tds < g.start) return 'planned';
+  if(tds > g.end) return 'closed';
+  return 'running';
+}
+function yearRange(y){ return { start: y + '-01-01', end: y + '-12-31' }; }
+function periodLabel(g){
+  if(g.mode === 'year') return 'Jahr ' + g.year;
+  return fmtShort(parseYmd(g.start)) + ' – ' + fmtShort(parseYmd(g.end));
+}
+function goalSort(a, b){
+  const order = { running:0, planned:1, closed:2 };
+  const pa = order[goalPhase(a)], pb = order[goalPhase(b)];
+  if(pa !== pb) return pa - pb;
+  if(a.end !== b.end) return a.end < b.end ? -1 : 1;
+  return (a.created || 0) - (b.created || 0);
+}
+
+function addGoalEntry(gid, ds, v, note){
+  const g = state.goals.find(function(x){ return x.id === gid; });
+  if(!g) return;
+  g.entries.push({ id: uid(), ds: ds, v: v, n: note || '' });
+  g.entries.sort(function(a, b){ return a.ds < b.ds ? 1 : (a.ds > b.ds ? -1 : 0); });
+  persist();
+}
+function toggleStep(gid, sid){
+  const g = state.goals.find(function(x){ return x.id === gid; });
+  if(!g) return;
+  const st = (g.steps || []).find(function(x){ return x.id === sid; });
+  if(!st) return;
+  st.done = !st.done;
+  persist(); render();
+}
+function addStep(gid, text){
+  const g = state.goals.find(function(x){ return x.id === gid; });
+  const t = String(text || '').trim();
+  if(!g || !t) return false;
+  g.steps.push({ id: uid(), text: t, done: false });
+  persist();
+  return true;
+}
+
 /* ===== Render: Steuerung ===== */
 function render(){
   updateBrandDots();
   if(currentView === 'today') renderToday();
   else if(currentView === 'todos') renderTodos();
+  else if(currentView === 'goals') renderGoals();
   else if(currentView === 'week') renderWeek();
   else if(currentView === 'stats') renderStats();
   else renderManage();
@@ -1258,14 +1521,23 @@ function renderToday(){
     kpi(active.length, 'Aktive Habits', '') +
   '</div>';
 
+  /* Erfüllte rutschen aus der offenen Liste. Ein Zahlenwert unter dem Ziel
+     gilt nicht als erfüllt und bleibt stehen, damit man nachlegen kann. */
+  const open = due.filter(function(h){ return !isDone(h, ds); });
+  const doneList = active.filter(function(h){ return isDone(h, ds); });
+  const openOthers = others.filter(function(h){ return !isDone(h, ds); });
+
   html += '<div class="sec"><div class="sec-head"><div class="sec-title">Heute fällig</div>' +
           '<div class="sec-count">' + fmtLong(t) + '</div></div>';
-  if(!due.length){
-    html += active.length
-      ? '<div class="empty"><b>Heute nichts fällig</b><span>Genieß den freien Tag – oder hak unten etwas als Bonus ab.</span></div>'
-      : '<div class="empty"><b>Noch keine Habits</b><span>Leg unten rechts deinen ersten Habit an.</span></div>';
+  if(!active.length){
+    html += '<div class="empty"><b>Noch keine Habits</b><span>Leg unten rechts deinen ersten Habit an.</span></div>';
+  } else if(!due.length){
+    html += '<div class="empty"><b>Heute nichts fällig</b><span>Genieß den freien Tag – oder hak unten etwas als Bonus ab.</span></div>';
+  } else if(!open.length){
+    html += '<div class="empty"><b>Für heute alles erledigt</b><span>' + due.length +
+      (due.length === 1 ? ' Habit abgehakt.' : ' Habits abgehakt.') + '</span></div>';
   } else {
-    html += '<div class="list">' + due.map(function(h){ return habitRow(h, ds, mon, false); }).join('') + '</div>';
+    html += '<div class="list">' + open.map(function(h){ return habitRow(h, ds, mon, false); }).join('') + '</div>';
   }
   html += '</div>';
 
@@ -1276,10 +1548,22 @@ function renderToday(){
       '<div class="list">' + tdo.map(todoRow).join('') + '</div></div>';
   }
 
-  if(others.length){
+  if(openOthers.length){
     html += '<div class="sec"><div class="sec-head"><div class="sec-title">Heute nicht fällig</div>' +
             '<div class="sec-count">zählt als Bonus</div></div>' +
-            '<div class="list">' + others.map(function(h){ return habitRow(h, ds, mon, true); }).join('') + '</div></div>';
+            '<div class="list">' + openOthers.map(function(h){ return habitRow(h, ds, mon, true); }).join('') + '</div></div>';
+  }
+
+  if(doneList.length){
+    html += '<div class="sec"><button class="done-toggle" data-donetoday="1">' +
+      (showDoneToday ? '▾' : '▸') + ' Erledigt (' + doneList.length + ')</button>';
+    if(showDoneToday){
+      html += '<div class="list">' + doneList.map(function(h){
+        return habitRow(h, ds, mon, !dueIds[h.id]);
+      }).join('') + '</div>' +
+      '<div class="legend">Antippen macht den Eintrag wieder rückgängig.</div>';
+    }
+    html += '</div>';
   }
   $('view-today').innerHTML = html;
 }
@@ -1320,6 +1604,101 @@ function habitRow(h, ds, mon, isBonus){
     (isNum(h) ? valueButton(h, ds)
               : '<button class="check' + (done ? ' on' : '') + '" data-toggle="' + h.id + '" data-ds="' + ds + '" aria-label="Abhaken"><span>✓</span></button>') +
   '</div>';
+}
+
+/* ===== Render: Ziele ===== */
+function renderGoals(){
+  const list = state.goals.slice().sort(goalSort);
+  if(!list.length){
+    $('view-goals').innerHTML = '<div class="empty"><b>Noch keine Ziele</b><span>Leg ein Jahresziel an – ' +
+      'eine Zahl, die sich aufsummiert, oder ein Vorhaben mit Teilschritten.</span></div>';
+    return;
+  }
+  let html = '';
+  [['running','Laufend'], ['planned','Geplant'], ['closed','Abgeschlossen']].forEach(function(gr){
+    const part = list.filter(function(g){ return goalPhase(g) === gr[0]; });
+    if(!part.length) return;
+    html += '<div class="sec"><div class="sec-head"><div class="sec-title">' + gr[1] + '</div>' +
+      '<div class="sec-count">' + part.length + '</div></div>' +
+      part.map(goalCard).join('') + '</div>';
+  });
+  $('view-goals').innerHTML = html;
+}
+
+function goalCard(g){
+  const p = goalProgress(g);
+  const pace = goalPace(g);
+  const phase = goalPhase(g);
+  const pct = Math.round(p.pct * 100);
+  const num = g.kind === 'number';
+
+  let html = '<div class="goal-card' + (phase === 'closed' ? ' closed' : '') + '" style="--g-color:' + g.color + '">';
+  html += '<div class="goal-head"><em>' + esc(g.icon) + '</em><div class="t">' +
+    '<b>' + esc(g.title) + '</b><span>' + esc(periodLabel(g)) + '</span></div>' +
+    '<button class="icon-btn" data-goaledit="' + g.id + '" aria-label="Ziel bearbeiten">✎</button></div>';
+
+  html += '<div class="goal-nums"><b>' + (num ? fmtNum(p.cur, g.dec) : p.cur) + '</b>' +
+    '<span>von ' + (num ? fmtNum(p.target, g.dec) + (g.unit ? ' ' + esc(g.unit) : '')
+                        : p.target + (p.target === 1 ? ' Schritt' : ' Schritten')) + '</span>' +
+    '<span class="pct">' + pct + ' %</span></div>';
+
+  html += '<div class="gbar-wrap"><div class="gbar"><i style="width:' + Math.min(100, pct) + '%"></i></div>' +
+    (pace.state === 'running' ? '<span class="soll" style="left:' +
+      (pace.frac * 100).toFixed(1) + '%" title="Soll heute"></span>' : '') + '</div>';
+
+  html += '<div class="goal-pace">' + paceTag(g, p, pace) +
+    (pace.state === 'running'
+      ? '<span class="goal-rest">noch ' + pace.rest + (pace.rest === 1 ? ' Tag' : ' Tage') + '</span>'
+      : (pace.state === 'future'
+          ? '<span class="goal-rest">startet in ' + Math.abs(pace.rest) + ' Tagen</span>'
+          : '<span class="goal-rest">abgeschlossen</span>')) + '</div>';
+
+  if(g.kind === 'project'){
+    html += '<div class="steps">';
+    (g.steps || []).forEach(function(st){
+      html += '<div class="step' + (st.done ? ' on' : '') + '">' +
+        '<button class="sbox" data-step="' + g.id + '" data-sid="' + st.id + '" aria-label="Schritt abhaken">✓</button>' +
+        '<button class="stxt" data-step="' + g.id + '" data-sid="' + st.id + '">' + esc(st.text) + '</button>' +
+        '<button class="sdel" data-stepdel="' + g.id + '" data-sid="' + st.id + '" aria-label="Schritt löschen">✕</button>' +
+        '</div>';
+    });
+    html += '<div class="step-add"><input type="text" id="step-' + g.id + '" placeholder="Teilschritt hinzufügen …" autocomplete="off">' +
+      '<button data-stepadd="' + g.id + '" aria-label="Schritt hinzufügen">＋</button></div></div>';
+  } else {
+    html += '<div class="goal-acts">' +
+      '<button class="mini-btn" data-goalentry="' + g.id + '">＋ Fortschritt</button>' +
+      (g.entries.length ? '<button class="mini-btn" data-goallog="' + g.id + '">Verlauf (' + g.entries.length + ')</button>' : '') +
+      '</div>';
+    if(openLogs[g.id] && g.entries.length){
+      html += '<div class="goal-log">' + g.entries.map(function(e){
+        return '<div class="log-row"><span class="d">' + fmtShort(parseYmd(e.ds)) + '</span>' +
+          '<span class="v">' + fmtNum(e.v, g.dec) + (g.unit ? ' ' + esc(g.unit) : '') + '</span>' +
+          '<span class="nt">' + esc(e.n || '') + '</span>' +
+          '<button class="x" data-logdel="' + g.id + '" data-eid="' + e.id + '" aria-label="Eintrag löschen">✕</button></div>';
+      }).join('') + '</div>';
+    }
+  }
+  return html + '</div>';
+}
+
+function paceTag(g, p, pace){
+  const num = g.kind === 'number';
+  if(p.pct >= 1) return '<span class="pace-tag done">Ziel erreicht</span>';
+  if(pace.state === 'future') return '<span class="pace-tag even">noch nicht gestartet</span>';
+  if(pace.state === 'past') return '<span class="pace-tag behind">bei ' + Math.round(p.pct*100) + ' % beendet</span>';
+  const soll = p.target * pace.frac;
+  const diff = p.cur - soll;
+  /* Teilschritte gibt es nur ganz: auf Schritte runden und erst ab einem halben melden */
+  const tol = num ? Math.max(p.target * 0.02, 0.0001) : 0.5;
+  const sollTxt = '<span style="color:var(--muted)">Soll heute ' +
+    (num ? fmtNum(soll, g.dec) : Math.round(soll)) + '</span>';
+  if(Math.abs(diff) <= tol) return '<span class="pace-tag even">im Plan</span>' + sollTxt;
+  const ahead = diff > 0;
+  const steps = Math.round(Math.abs(diff));
+  const amount = num ? fmtNum(Math.abs(diff), g.dec) + (g.unit ? ' ' + esc(g.unit) : '')
+                     : steps + (steps === 1 ? ' Schritt' : ' Schritte');
+  return '<span class="pace-tag ' + (ahead ? 'ahead' : 'behind') + '">' +
+    amount + (ahead ? ' vor Plan' : ' zurück') + '</span>' + sollTxt;
 }
 
 /* ===== Render: Woche ===== */
@@ -1467,7 +1846,7 @@ function ring(pct, color){
     '<circle cx="28" cy="28" r="' + r + '" fill="none" stroke="#F0EEE8" stroke-width="6"></circle>' +
     '<circle cx="28" cy="28" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="6" stroke-linecap="round" ' +
     'stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 28 28)"></circle>' +
-    '<text x="28" y="32" text-anchor="middle" font-size="14" font-weight="600" fill="#1B1A22" font-family="Inter,sans-serif">' +
+    '<text x="28" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#1B1A22" font-family="Fraunces,Georgia,serif">' +
     (pct === null ? '–' : pct) + '</text></svg>';
 }
 
@@ -1814,6 +2193,14 @@ function setValue(hid, ds, v, note){
   persist();
 }
 
+function submitStep(gid){
+  const inp = $('step-' + gid); if(!inp) return;
+  if(!addStep(gid, inp.value)){ toast('Bitte einen Teilschritt eingeben'); inp.focus(); return; }
+  renderGoals();
+  const again = $('step-' + gid);
+  if(again) again.focus();
+}
+
 function quickAdd(){
   const inp = $('quickTodo'); if(!inp) return;
   const due = $('quickDue') ? $('quickDue').value || null : null;
@@ -1833,6 +2220,120 @@ function buildPickers(){
   }).join('');
   $('iconRow').innerHTML = iconPickerHtml(false);
   $('todoIconRow').innerHTML = iconPickerHtml(true);
+  $('goalIconRow').innerHTML = iconPickerHtml(false);
+  $('goalSwatches').innerHTML = COLORS.map(function(c){
+    return '<button type="button" class="swatch" data-color="' + c + '" style="background:' + c + '" aria-label="Farbe"></button>';
+  }).join('');
+}
+
+const GKIND_HINTS = {
+  number: 'Eine Zahl, die sich über den Zeitraum aufsummiert – z. B. 2.500 km.',
+  project: 'Ein Vorhaben, das du in Teilschritte zerlegst – z. B. Garten neu gestalten.'
+};
+
+function openGoal(id){
+  editGoalId = id || null;
+  const g = id ? state.goals.find(function(x){ return x.id === id; }) : null;
+  const yNow = new Date().getFullYear();
+  let opts = '';
+  for(let y = yNow - 1; y <= yNow + 5; y++) opts += '<option value="' + y + '">' + y + '</option>';
+  $('fGYear').innerHTML = opts;
+
+  $('goalTitle').textContent = g ? 'Ziel bearbeiten' : 'Neues Ziel';
+  $('fGName').value = g ? g.title : '';
+  gform.kind = g ? g.kind : 'number';
+  gform.mode = g ? (g.mode || 'year') : 'year';
+  gform.icon = g ? g.icon : '🎯';
+  gform.color = g ? g.color : COLORS[0];
+  $('fGTarget').value = (g && g.kind === 'number' && typeof g.target === 'number') ? plainNum(g.target, g.dec) : '';
+  $('fGUnit').value = g && g.unit ? g.unit : '';
+  $('fGDec').value = g ? String(g.dec || 0) : '0';
+  $('fGYear').value = String(g && g.year ? g.year : yNow);
+  $('fGStart').value = g ? g.start : yearRange(yNow).start;
+  $('fGEnd').value = g ? g.end : yearRange(yNow).end;
+  $('goalActions').style.display = g ? 'grid' : 'none';
+  syncGoalForm();
+  openOv('ovGoal');
+  if(!g) setTimeout(function(){ $('fGName').focus(); }, 260);
+}
+
+function syncGoalForm(){
+  Array.prototype.forEach.call(document.querySelectorAll('#gKindSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.gkind === gform.kind);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#gModeSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.gmode === gform.mode);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#goalIconRow button'), function(b){
+    b.classList.toggle('on', b.dataset.icon === gform.icon);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#goalSwatches .swatch'), function(b){
+    b.classList.toggle('on', b.dataset.color === gform.color);
+  });
+  $('gKindHint').textContent = GKIND_HINTS[gform.kind];
+  $('wrapGNum').style.display = gform.kind === 'number' ? 'block' : 'none';
+  $('wrapGYear').style.display = gform.mode === 'year' ? 'block' : 'none';
+  $('wrapGRange').style.display = gform.mode === 'custom' ? 'grid' : 'none';
+}
+
+function saveGoal(){
+  const title = $('fGName').value.trim();
+  if(!title){ toast('Bitte einen Namen eingeben'); $('fGName').focus(); return; }
+  const dec = Number($('fGDec').value) || 0;
+  let target = null;
+  if(gform.kind === 'number'){
+    target = parseNum($('fGTarget').value, dec);
+    if(target === null || target <= 0){ toast('Bitte einen Zielwert angeben'); $('fGTarget').focus(); return; }
+  }
+  let start, end, year = null;
+  if(gform.mode === 'year'){
+    year = Number($('fGYear').value) || new Date().getFullYear();
+    const r = yearRange(year); start = r.start; end = r.end;
+  } else {
+    start = $('fGStart').value; end = $('fGEnd').value;
+    if(!start || !end){ toast('Bitte Start und Ende angeben'); return; }
+    if(end < start){ toast('Das Ende liegt vor dem Start'); return; }
+  }
+  const data = {
+    title: title, kind: gform.kind, icon: gform.icon, color: gform.color,
+    unit: gform.kind === 'number' ? $('fGUnit').value.trim() : '',
+    dec: dec, target: target, mode: gform.mode, year: year, start: start, end: end
+  };
+  if(editGoalId){
+    const g = state.goals.find(function(x){ return x.id === editGoalId; });
+    if(g) Object.keys(data).forEach(function(k){ g[k] = data[k]; });
+  } else {
+    data.id = uid(); data.steps = []; data.entries = []; data.done = false; data.created = Date.now();
+    state.goals.push(data);
+  }
+  persist(); closeOv('ovGoal'); render();
+  toast(editGoalId ? 'Ziel gespeichert' : 'Ziel angelegt');
+}
+
+function openGoalEntry(gid){
+  const g = state.goals.find(function(x){ return x.id === gid; });
+  if(!g) return;
+  goalEntryId = gid;
+  $('geTitle').textContent = g.title;
+  $('geValueLabel').textContent = 'Wie viel kommt dazu?';
+  $('fGeValue').value = '';
+  $('geUnit').textContent = g.unit || '';
+  const p = goalProgress(g);
+  $('geHint').textContent = 'Bisher ' + fmtNum(p.cur, g.dec) + ' von ' + fmtNum(p.target, g.dec) +
+    (g.unit ? ' ' + g.unit : '') + '. Der Wert wird addiert.';
+  $('fGeDate').value = todayDs();
+  $('fGeNote').value = '';
+  openOv('ovGoalEntry');
+  setTimeout(function(){ $('fGeValue').focus(); }, 260);
+}
+
+function saveGoalEntry(){
+  const g = state.goals.find(function(x){ return x.id === goalEntryId; });
+  if(!g) return;
+  const v = parseNum($('fGeValue').value, g.dec);
+  if(v === null){ toast('Bitte eine gültige Zahl eingeben'); $('fGeValue').focus(); return; }
+  addGoalEntry(g.id, $('fGeDate').value || todayDs(), v, $('fGeNote').value.trim());
+  closeOv('ovGoalEntry'); render(); toast('Eingetragen');
 }
 
 function iconPickerHtml(withNone){
@@ -1865,7 +2366,8 @@ function bindEvents(){
     Array.prototype.forEach.call(document.querySelectorAll('.view'), function(v){
       v.classList.toggle('active', v.id === 'view-' + currentView);
     });
-    $('fab').textContent = currentView === 'todos' ? '＋ To‑do' : '＋ Habit';
+    $('fab').textContent = currentView === 'todos' ? '＋ To‑do'
+                          : (currentView === 'goals' ? '＋ Ziel' : '＋ Habit');
     window.scrollTo(0, 0);
     render();
   });
@@ -1875,7 +2377,41 @@ function bindEvents(){
     if(cl){ closeOv(cl.dataset.close); return; }
 
     const tg = e.target.closest('[data-toggle]');
-    if(tg){ toggleDay(tg.dataset.toggle, tg.dataset.ds); return; }
+    if(tg){
+      const h = state.habits.find(function(x){ return x.id === tg.dataset.toggle; });
+      const leaving = currentView === 'today' && h && !isDone(h, tg.dataset.ds) && !showDoneToday;
+      toggleDay(tg.dataset.toggle, tg.dataset.ds, leaving ? tg.closest('.row') : null);
+      return;
+    }
+
+    const ge = e.target.closest('[data-goaledit]');
+    if(ge){ openGoal(ge.dataset.goaledit); return; }
+
+    const gn = e.target.closest('[data-goalentry]');
+    if(gn){ openGoalEntry(gn.dataset.goalentry); return; }
+
+    const gl = e.target.closest('[data-goallog]');
+    if(gl){ const id = gl.dataset.goallog; openLogs[id] = !openLogs[id]; renderGoals(); return; }
+
+    const ld = e.target.closest('[data-logdel]');
+    if(ld){
+      const g = state.goals.find(function(x){ return x.id === ld.dataset.logdel; });
+      if(g){ g.entries = g.entries.filter(function(x){ return x.id !== ld.dataset.eid; }); persist(); renderGoals(); }
+      return;
+    }
+
+    const sp = e.target.closest('[data-step]');
+    if(sp){ toggleStep(sp.dataset.step, sp.dataset.sid); return; }
+
+    const sd = e.target.closest('[data-stepdel]');
+    if(sd){
+      const g = state.goals.find(function(x){ return x.id === sd.dataset.stepdel; });
+      if(g){ g.steps = g.steps.filter(function(x){ return x.id !== sd.dataset.sid; }); persist(); render(); }
+      return;
+    }
+
+    const sa = e.target.closest('[data-stepadd]');
+    if(sa){ submitStep(sa.dataset.stepadd); return; }
 
     const vc = e.target.closest('[data-val]');
     if(vc){ openNote(vc.dataset.val, vc.dataset.ds); return; }
@@ -1888,6 +2424,9 @@ function bindEvents(){
 
     const dt = e.target.closest('[data-donetoggle]');
     if(dt){ showDoneTodos = !showDoneTodos; renderTodos(); return; }
+
+    const dh = e.target.closest('[data-donetoday]');
+    if(dh){ showDoneToday = !showDoneToday; renderToday(); return; }
 
     const qa = e.target.closest('#btnQuickAdd');
     if(qa){ quickAdd(); return; }
@@ -1955,11 +2494,40 @@ function bindEvents(){
   });
 
   $('fab').addEventListener('click', function(){
-    if(currentView === 'todos') openTodoSheet(null); else openHabit(null);
+    if(currentView === 'todos') openTodoSheet(null);
+    else if(currentView === 'goals') openGoal(null);
+    else openHabit(null);
   });
 
   document.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' && e.target && e.target.id === 'quickTodo') quickAdd();
+    if(e.key !== 'Enter' || !e.target || !e.target.id) return;
+    if(e.target.id === 'quickTodo') quickAdd();
+    else if(e.target.id.indexOf('step-') === 0) submitStep(e.target.id.slice(5));
+  });
+
+  $('gKindSeg').addEventListener('click', function(e){
+    const b = e.target.closest('button[data-gkind]'); if(!b) return;
+    gform.kind = b.dataset.gkind; syncGoalForm();
+  });
+  $('gModeSeg').addEventListener('click', function(e){
+    const b = e.target.closest('button[data-gmode]'); if(!b) return;
+    gform.mode = b.dataset.gmode; syncGoalForm();
+  });
+  $('goalIconRow').addEventListener('click', function(e){
+    const b = e.target.closest('[data-icon]'); if(!b) return;
+    gform.icon = b.dataset.icon; syncGoalForm();
+  });
+  $('goalSwatches').addEventListener('click', function(e){
+    const b = e.target.closest('[data-color]'); if(!b) return;
+    gform.color = b.dataset.color; syncGoalForm();
+  });
+  $('btnSaveGoal').addEventListener('click', saveGoal);
+  $('btnSaveGoalEntry').addEventListener('click', saveGoalEntry);
+  $('btnDeleteGoal').addEventListener('click', function(){
+    const g = state.goals.find(function(x){ return x.id === editGoalId; }); if(!g) return;
+    if(!confirm('„' + g.title + '“ löschen? Fortschritt und Teilschritte gehen verloren.')) return;
+    state.goals = state.goals.filter(function(x){ return x.id !== editGoalId; });
+    persist(); closeOv('ovGoal'); render(); toast('Ziel gelöscht');
   });
 
   $('todoIconRow').addEventListener('click', function(e){
